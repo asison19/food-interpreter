@@ -1,0 +1,42 @@
+' Stating the year
+@startuml
+
+left to right direction
+
+[*] --> Year
+Year --> Semicolon
+Year --> EOL
+Semicolon --> EOL
+EOL --> [*]
+
+@enduml
+
+' Stating the food
+@startuml
+
+left to right direction
+
+[*] --> MonthAndDay
+MonthAndDay --> Time
+Time --> Food
+Time --> Repeater
+Food --> Comma
+Food --> Semicolon
+Repeater --> Semicolon
+Repeater --> Comma
+Comma --> Food
+Semicolon --> Time
+Semicolon --> EOL
+EOL --> [*]
+
+@enduml
+
+' Comments
+@startuml
+
+left to right direction
+
+[*] --> Comments
+Comments --> EOL
+
+@enduml
