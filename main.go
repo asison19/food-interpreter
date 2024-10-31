@@ -14,6 +14,7 @@ func main() {
 	scanFile(args[0])
 }
 
+// TODO error handling
 func scanFile(filePath string) {
 	file, err := os.Open(filePath)
 	if err != nil {
