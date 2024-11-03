@@ -1,4 +1,4 @@
-package token
+package lex
 
 const (
 	YEAR = iota
@@ -14,4 +14,5 @@ const (
 type token struct {
 	tokenType int
 	lexeme    string
+	literal   string
 }

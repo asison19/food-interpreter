@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"food-interpreter/lex"
 	"os"
 )
 
@@ -23,11 +24,6 @@ func scanFile(filePath string) {
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
-	}
+	reader := bufio.NewReader(file)
+	lex.ScanTokens(reader)
 }
