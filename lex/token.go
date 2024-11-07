@@ -9,9 +9,10 @@ const (
 	FOOD
 	REPEATER
 	COMMA
+	SLEEP
 )
 
-type token struct {
+type Token struct {
 	tokenType int
 	lexeme    string
 	literal   string
