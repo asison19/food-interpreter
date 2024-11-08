@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"food-interpreter/lex"
+	"food-interpreter/lexer"
 	"os"
 )
 
@@ -25,5 +25,5 @@ func scanFile(filePath string) {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	lex.ScanTokens(reader)
+	lexer.ScanTokens(reader)
 }
