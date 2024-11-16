@@ -4,7 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
+	"strconv"
 	"strings"
+	//"unicode"
 )
 
 // TODO current location of the file?
@@ -17,7 +20,7 @@ type Lexer struct {
 }
 
 func ScanTokens(reader *bufio.Reader) {
-	lexer := Lexer{0, 0, "", "", nil}
+	lexer := Lexer{0, 0, "", "", []Token{}} // TODO add stuff to lexer
 
 	for {
 		line, err := reader.ReadString('\n')
@@ -31,6 +34,7 @@ func ScanTokens(reader *bufio.Reader) {
 		}
 
 		if err == io.EOF { // TODO broken
+			fmt.Println("End of File.")
 			break
 		}
 		scanLine(lexer, line)
@@ -45,40 +49,24 @@ func scanLine(lexer Lexer, line string) {
 
 	for {
 		c, hasText := lexer.advance(scanner)
+		fmt.Println("c: ", c)
 
 		if hasText {
-			fmt.Println(c)
+			//fmt.Println(c)
 		} else {
-			fmt.Println("No hasText")
+			//fmt.Println("No hasText")
 			break
 		}
 
-		//switch {
-		//case isNumber(byte(c)):
-		//	str := c
-		//	//tokens = append(tokens, addToken(c))
-		//	ahead, err := lexer.lookahead(2)
-		//	if err == bufio.ErrBufferFull {
-		//		fmt.Println("End of file reading number", bufio.ErrBufferFull)
-		//	}
+		switch {
+		case isNumber(c): // MonthAndDay or Time
+			lexer.tokens = append(lexer.tokens, lexer.number(c, scanner))
 
-		//	// MonthAndDay
-		//	// TODO allow for month and day separator other than '/'?
-		//	if strings.Contains(string(ahead), "/") {
-		//		// TODO read 2 runes
-		//		a, err := lexer.reader.ReadBytes(byte('/'))
-		//		str += string(a)
-		//		if err != nil {
-		//			fmt.Println(err)
-		//			return
-		//		}
-		//	}
-
-		//case isLetter(byte(c)):
-		//	fmt.Println("letter.")
-		//default:
-		//	fmt.Println(string(c))
-		//}
+		case isLetter(c):
+			fmt.Println("letter.")
+		default:
+			//fmt.Println(string(c))
+		}
 
 		//// Single rune checking
 		//switch c {
@@ -96,22 +84,24 @@ func scanLine(lexer Lexer, line string) {
 		//	}
 		//}
 	}
+	fmt.Println(lexer.tokens)
 }
 
 func (l *Lexer) advance(s *bufio.Scanner) (string, bool) {
 	l.position++
 	if hasText := s.Scan(); hasText {
+		l.literal += s.Text()
 		return s.Text(), true
 	}
 	return "", false
 }
 
 // TODO lookahead
-func (l *Lexer) lookahead(amount int) (string, bool) {
-	if l.position+amount > len(l.line) {
-		return "", false
+func (l *Lexer) lookahead(amount int) string {
+	if l.position+amount >= len(l.line) {
+		return "\n"
 	}
-	return l.line[l.position : l.position+amount], true
+	return l.line[l.position : l.position+amount]
 }
 
 func (l *Lexer) addToken(token Token) {
@@ -122,23 +112,83 @@ func (l *Lexer) scanningError(token Token) {
 	fmt.Println("Error at line ", l.position)
 }
 
-func isNumber(c byte) bool {
-	return '0' <= c && c <= '9'
-}
+// TODO
+func (l *Lexer) number(c string, s *bufio.Scanner) Token {
+	ahead := l.lookahead(1)
+	lit := ""
 
-func isNumbers(s []byte) bool {
-	for _, c := range s {
-		if '0' > c && c > '9' {
-			return false
+	for isNumber(ahead) {
+		adv, _ := l.advance(s)
+		lit += adv
+		fmt.Println(lit)
+		ahead = l.lookahead(1)
+	}
+
+	// Month
+	if strings.Contains(ahead, "/") {
+		l.advance(s)
+		day := l.lookahead(1)
+		if day == "\n" {
+			fmt.Println("End of file reading number", bufio.ErrBufferFull) // TODO what is this again, ErrBufferFull?
+		}
+
+		if !isNumber(day) {
+			fmt.Println("Error, no day given in MonthAndDay token")
+			return Token{}
+		}
+		for isNumber(day) {
+			l.advance(s)
+		}
+		return Token{
+			tokenType: MONTHANDDAY,
+			//lexeme:
+			literal: lit,
 		}
 	}
-	return true
+	var tok = Token{
+		tokenType: TIME,
+		//lexeme:
+		literal: lit,
+	}
+	fmt.Println("returning token ", tok)
+	//return Token{
+	//	tokenType: TIME,
+	//	//lexeme:
+	//	literal: literal,
+	//}
+	return tok
 }
 
-func isLetter(c byte) bool {
-	return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z'
+func isNumber(c string) bool {
+	if _, err := strconv.Atoi(c); err == nil {
+		return true
+	}
+	return false
 }
 
-func isAlphaNumeric(c byte) bool {
-	return isLetter(c) && isAlphaNumeric(c)
+//func isNumbers(s []byte) bool {
+//	for _, c := range s {
+//		if '0' > c && c > '9' {
+//			return false
+//		}
+//	}
+//	return true
+//}
+
+//func isInt(s string) bool {
+//	for _, c := range s {
+//		if !unicode.IsDigit(c) {
+//			return false
+//		}
+//	}
+//	return true
+//}
+
+func isLetter(c string) bool {
+	isAlpha := regexp.MustCompile(`^[A-Za-z]+$`).MatchString
+	return isAlpha(c)
+}
+
+func isAlphaNumeric(c string) bool {
+	return isLetter(c) && isNumber(c)
 }

@@ -8,3 +8,6 @@ pbj = peanut butter and jelly
 1/24 700 abc; 1230 def; 1900 ghi;
 1/25 700 abc; 1230 def; 1900 ghi;
 11/25 700 abc; 1230 def; 1900 ghi;
+// TODO multiplication outisde and inside paren
+// 11/25 700 2*abc; 1230 def; 1900 ghi;
+// 11/25 700 abc (2); 1230 def; 1900 ghi;

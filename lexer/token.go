@@ -14,6 +14,6 @@ const (
 
 type Token struct {
 	tokenType int
-	lexeme    string
-	literal   string
+	//lexeme    string
+	literal string
 }
