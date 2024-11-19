@@ -14,13 +14,14 @@ import (
 type Lexer struct {
 	position     int
 	nextPosition int
+	linePosition int
 	literal      string
 	line         string
 	tokens       []Token
 }
 
 func ScanTokens(reader *bufio.Reader) {
-	lexer := Lexer{0, 0, "", "", []Token{}} // TODO add stuff to lexer
+	lexer := Lexer{0, 0, 0, "", "", []Token{}} // TODO add stuff to lexer
 
 	for {
 		line, err := reader.ReadString('\n')
@@ -40,63 +41,41 @@ func ScanTokens(reader *bufio.Reader) {
 		scanLine(lexer, line)
 	}
 
-	fmt.Println("Tokens", lexer.tokens)
 }
 
 func scanLine(lexer Lexer, line string) {
-	scanner := bufio.NewScanner(strings.NewReader(line))
 	lexer.line = line
 
+	//for i, ch := range line {
 	for {
-		c, hasText := lexer.advance(scanner)
-		fmt.Println("c: ", c)
+		c := lexer.advance()
 
-		if hasText {
-			//fmt.Println(c)
+		if c != "" {
 		} else {
-			//fmt.Println("No hasText")
 			break
 		}
 
 		switch {
 		case isNumber(c): // MonthAndDay or Time
-			lexer.tokens = append(lexer.tokens, lexer.number(c, scanner))
-
-		case isLetter(c):
-			fmt.Println("letter.")
+			lexer.tokens = append(lexer.tokens, lexer.number(c))
 		default:
 			//fmt.Println(string(c))
 		}
-
-		//// Single rune checking
-		//switch c {
-		//case 'y': // Year or potential start of food, variable, or value
-		//	ahead, err := lexer.lookahead(1)
-		//	if err == bufio.ErrBufferFull {
-		//		fmt.Println("End of file reading number", bufio.ErrBufferFull)
-		//	}
-
-		//case '/':
-		//	if lexer.lookahead(a) == '/' {
-
-		//	} else {
-
-		//	}
-		//}
 	}
 	fmt.Println(lexer.tokens)
 }
 
-func (l *Lexer) advance(s *bufio.Scanner) (string, bool) {
-	l.position++
-	if hasText := s.Scan(); hasText {
-		l.literal += s.Text()
-		return s.Text(), true
+// Returns position based off of a 1 indexed "line"
+func (l *Lexer) advance() string {
+	defer func() { l.position += 1 }()
+	if l.position >= len(l.line) {
+		return ""
 	}
-	return "", false
+	c := string(l.line[l.position])
+	l.literal += c
+	return c
 }
 
-// TODO lookahead
 func (l *Lexer) lookahead(amount int) string {
 	if l.position+amount >= len(l.line) {
 		return "\n"
@@ -106,27 +85,25 @@ func (l *Lexer) lookahead(amount int) string {
 
 func (l *Lexer) addToken(token Token) {
 	l.tokens = append(l.tokens, token)
+	l.literal = ""
 }
 
 func (l *Lexer) scanningError(token Token) {
 	fmt.Println("Error at line ", l.position)
 }
 
-// TODO
-func (l *Lexer) number(c string, s *bufio.Scanner) Token {
+func (l *Lexer) number(c string) Token {
 	ahead := l.lookahead(1)
-	lit := ""
 
 	for isNumber(ahead) {
-		adv, _ := l.advance(s)
-		lit += adv
-		fmt.Println(lit)
+		l.advance()
+		// fmt.Println(lit)
 		ahead = l.lookahead(1)
 	}
 
 	// Month
 	if strings.Contains(ahead, "/") {
-		l.advance(s)
+		l.advance()
 		day := l.lookahead(1)
 		if day == "\n" {
 			fmt.Println("End of file reading number", bufio.ErrBufferFull) // TODO what is this again, ErrBufferFull?
@@ -137,18 +114,23 @@ func (l *Lexer) number(c string, s *bufio.Scanner) Token {
 			return Token{}
 		}
 		for isNumber(day) {
-			l.advance(s)
+			l.advance()
+			day = l.lookahead(1)
 		}
-		return Token{
+		var tok = Token{
 			tokenType: MONTHANDDAY,
 			//lexeme:
-			literal: lit,
+			literal: l.literal,
 		}
+
+		fmt.Println("returning token ", tok)
+		return tok
+
 	}
 	var tok = Token{
 		tokenType: TIME,
 		//lexeme:
-		literal: lit,
+		literal: l.literal,
 	}
 	fmt.Println("returning token ", tok)
 	//return Token{
@@ -165,24 +147,6 @@ func isNumber(c string) bool {
 	}
 	return false
 }
-
-//func isNumbers(s []byte) bool {
-//	for _, c := range s {
-//		if '0' > c && c > '9' {
-//			return false
-//		}
-//	}
-//	return true
-//}
-
-//func isInt(s string) bool {
-//	for _, c := range s {
-//		if !unicode.IsDigit(c) {
-//			return false
-//		}
-//	}
-//	return true
-//}
 
 func isLetter(c string) bool {
 	isAlpha := regexp.MustCompile(`^[A-Za-z]+$`).MatchString
