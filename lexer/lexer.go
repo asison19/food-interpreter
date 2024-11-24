@@ -57,7 +57,7 @@ L:
 
 		switch {
 		case isNumber(c): // MonthAndDay or Time
-			lexer.addToken(lexer.number(c))
+			lexer.addToken(lexer.number())
 			continue L
 		default:
 			//fmt.Println(string(c))
@@ -70,12 +70,13 @@ L:
 			continue L
 		}
 
-		//switch c {
-		//case "y":
-
-		//default:
-		//}
-		//fmt.Println("End of for, lexer.tokens", lexer.tokens)
+		switch c {
+		case "y":
+			lexer.addToken(lexer.year())
+			continue L
+		default:
+		}
+		fmt.Println("End of for, lexer.tokens", lexer.tokens)
 		fmt.Println("Not found for:", c)
 	}
 	lexer.clearLine()
@@ -119,7 +120,22 @@ func (l *Lexer) scanningError(token Token) {
 	fmt.Println("Error at line ", l.position)
 }
 
-func (l *Lexer) number(c string) Token {
+func (l *Lexer) year() Token {
+	ahead := l.lookahead(1)
+
+	for isNumber(ahead) {
+		l.advance()
+		ahead = l.lookahead(1)
+	}
+	return Token{
+		tokenType: YEAR,
+		lexeme:    l.lexeme,
+	}
+}
+
+// TODO certain dates should not be possible
+// E.g. 0/0, 1/32, etc.
+func (l *Lexer) number() Token {
 	ahead := l.lookahead(1)
 
 	for isNumber(ahead) {
@@ -144,27 +160,17 @@ func (l *Lexer) number(c string) Token {
 			l.advance()
 			day = l.lookahead(1)
 		}
-		var tok = Token{
+		return Token{
 			tokenType: MONTHANDDAY,
 			//lexeme:
 			lexeme: l.lexeme,
 		}
-
-		fmt.Println("returning token for MONTHANDDAY", tok)
-		return tok
 	}
-	var tok = Token{
+	return Token{
 		tokenType: TIME,
 		//lexeme:
 		lexeme: l.lexeme,
 	}
-	fmt.Println("returning token for TIME", tok)
-	//return Token{
-	//	tokenType: TIME,
-	//	//lexeme:
-	//	lexeme: lexeme,
-	//}
-	return tok
 }
 
 func isNumber(c string) bool {
