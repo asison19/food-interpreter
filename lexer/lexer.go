@@ -15,7 +15,7 @@ type Lexer struct {
 	position     int
 	nextPosition int
 	linePosition int
-	literal      string
+	lexeme       string
 	line         string
 	tokens       []Token
 }
@@ -34,46 +34,73 @@ func ScanTokens(reader *bufio.Reader) {
 			return
 		}
 
-		if err == io.EOF { // TODO broken
+		if err == io.EOF {
 			fmt.Println("End of File.")
 			break
 		}
-		scanLine(lexer, line)
+		scanLine(&lexer, line)
 	}
 
 }
 
-func scanLine(lexer Lexer, line string) {
+func scanLine(lexer *Lexer, line string) {
 	lexer.line = line
+	fmt.Println("lexer.line: ", lexer.line)
 
-	//for i, ch := range line {
+L:
 	for {
 		c := lexer.advance()
 
-		if c != "" {
-		} else {
+		if c == "" {
 			break
 		}
 
 		switch {
 		case isNumber(c): // MonthAndDay or Time
-			lexer.tokens = append(lexer.tokens, lexer.number(c))
+			lexer.addToken(lexer.number(c))
+			continue L
 		default:
 			//fmt.Println(string(c))
 		}
+
+		switch c {
+		case " ":
+		case "\n":
+			lexer.clearLexeme()
+			continue L
+		}
+
+		//switch c {
+		//case "y":
+
+		//default:
+		//}
+		//fmt.Println("End of for, lexer.tokens", lexer.tokens)
+		fmt.Println("Not found for:", c)
 	}
-	fmt.Println(lexer.tokens)
+	lexer.clearLine()
+	fmt.Println("End of line, lexer.tokens", lexer.tokens)
 }
 
-// Returns position based off of a 1 indexed "line"
 func (l *Lexer) advance() string {
 	defer func() { l.position += 1 }()
 	if l.position >= len(l.line) {
 		return ""
 	}
 	c := string(l.line[l.position])
-	l.literal += c
+	l.lexeme += c
 	return c
+}
+
+// Used to ignore certain tokens
+// TODO potentially just use a lookahead?
+func (l *Lexer) clearLexeme() {
+	l.lexeme = ""
+}
+
+func (l *Lexer) clearLine() {
+	l.line = "" // TODO probably don't need, but leave just in case?
+	l.position = 0
 }
 
 func (l *Lexer) lookahead(amount int) string {
@@ -85,7 +112,7 @@ func (l *Lexer) lookahead(amount int) string {
 
 func (l *Lexer) addToken(token Token) {
 	l.tokens = append(l.tokens, token)
-	l.literal = ""
+	l.lexeme = ""
 }
 
 func (l *Lexer) scanningError(token Token) {
@@ -120,23 +147,22 @@ func (l *Lexer) number(c string) Token {
 		var tok = Token{
 			tokenType: MONTHANDDAY,
 			//lexeme:
-			literal: l.literal,
+			lexeme: l.lexeme,
 		}
 
-		fmt.Println("returning token ", tok)
+		fmt.Println("returning token for MONTHANDDAY", tok)
 		return tok
-
 	}
 	var tok = Token{
 		tokenType: TIME,
 		//lexeme:
-		literal: l.literal,
+		lexeme: l.lexeme,
 	}
-	fmt.Println("returning token ", tok)
+	fmt.Println("returning token for TIME", tok)
 	//return Token{
 	//	tokenType: TIME,
 	//	//lexeme:
-	//	literal: literal,
+	//	lexeme: lexeme,
 	//}
 	return tok
 }

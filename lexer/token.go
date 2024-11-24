@@ -1,5 +1,9 @@
 package lexer
 
+import (
+	"fmt"
+)
+
 const (
 	YEAR = iota
 	SEMICOLON
@@ -15,5 +19,9 @@ const (
 type Token struct {
 	tokenType int
 	//lexeme    string
-	literal string
+	lexeme string
+}
+
+func (t *Token) String() string {
+	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.tokenType, t.lexeme)
 }
