@@ -43,10 +43,11 @@ func ScanTokens(reader *bufio.Reader) {
 
 }
 
+// TODO off by one at the end. Last line never gets read.
 func scanLine(lexer *Lexer, line string) {
 	lexer.line = line
-	fmt.Println("lexer.line: ", lexer.line)
 
+	// TODO do I need this for loop?
 L:
 	for {
 		c := lexer.advance()
@@ -74,10 +75,20 @@ L:
 		case "y":
 			lexer.addToken(lexer.year())
 			continue L
+		case ",":
+			lexer.addToken(Token{
+				tokenType: COMMA,
+				lexeme:    lexer.lexeme,
+			})
+			continue L
+		case "s":
+		case "S":
+			//sleep
+		case "(":
+		//case ";":
+		//	continue L
 		default:
 		}
-		fmt.Println("End of for, lexer.tokens", lexer.tokens)
-		fmt.Println("Not found for:", c)
 	}
 	lexer.clearLine()
 	fmt.Println("End of line, lexer.tokens", lexer.tokens)
