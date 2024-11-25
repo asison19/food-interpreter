@@ -24,6 +24,6 @@ func scanFile(filePath string) {
 	}
 	defer file.Close()
 
-	reader := bufio.NewReader(file)
-	lexer.ScanTokens(reader)
+	scanner := bufio.NewScanner(file)
+	lexer.ScanTokens(scanner)
 }

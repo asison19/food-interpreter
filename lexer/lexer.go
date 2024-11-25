@@ -3,7 +3,6 @@ package lexer
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,30 +19,18 @@ type Lexer struct {
 	tokens       []Token
 }
 
-func ScanTokens(reader *bufio.Reader) {
+func ScanTokens(scanner *bufio.Scanner) {
 	lexer := Lexer{0, 0, 0, "", "", []Token{}} // TODO add stuff to lexer
 
-	for {
-		line, err := reader.ReadString('\n')
+	for scanner.Scan() {
+		line := scanner.Text()
 
-		if err == io.EOF {
-			return
-		}
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		if err == io.EOF {
-			fmt.Println("End of File.")
-			break
-		}
-		scanLine(&lexer, line)
+		fmt.Println("Line:", string(line))
+		scanLine(&lexer, string(line))
 	}
 
 }
 
-// TODO off by one at the end. Last line never gets read.
 func scanLine(lexer *Lexer, line string) {
 	lexer.line = line
 
@@ -116,8 +103,8 @@ func (l *Lexer) clearLine() {
 }
 
 func (l *Lexer) lookahead(amount int) string {
-	if l.position+amount >= len(l.line) {
-		return "\n"
+	if l.position+amount > len(l.line) {
+		return "\n" // TODO return empty string?
 	}
 	return l.line[l.position : l.position+amount]
 }
@@ -151,7 +138,6 @@ func (l *Lexer) number() Token {
 
 	for isNumber(ahead) {
 		l.advance()
-		// fmt.Println(lit)
 		ahead = l.lookahead(1)
 	}
 
