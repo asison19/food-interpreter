@@ -7,7 +7,7 @@ import (
 const (
 	YEAR = iota
 	SEMICOLON
-	EOL
+	//EOL
 	MONTHANDDAY
 	TIME
 	FOOD

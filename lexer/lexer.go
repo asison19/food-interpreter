@@ -34,6 +34,7 @@ func ScanTokens(scanner *bufio.Scanner) {
 func scanLine(lexer *Lexer, line string) {
 	lexer.line = line
 
+	// TODO error handling
 	// TODO do I need this for loop?
 L:
 	for {
@@ -44,7 +45,7 @@ L:
 		}
 
 		switch {
-		case isNumber(c): // MonthAndDay or Time
+		case isNumber(c): // MONTHANDDAY or TIME
 			lexer.addToken(lexer.number())
 			continue L
 		default:
@@ -52,28 +53,35 @@ L:
 		}
 
 		switch c {
+		// Ignoreables
 		case " ":
 		case "\n":
 			lexer.clearLexeme()
 			continue L
-		}
-
-		switch c {
-		case "y":
+		case "y": // YEAR
 			lexer.addToken(lexer.year())
 			continue L
-		case ",":
+		case ";": // SEMICOLON
+			lexer.addToken(Token{
+				tokenType: SEMICOLON,
+				lexeme:    lexer.lexeme,
+			})
+		case ",": // COMMA
 			lexer.addToken(Token{
 				tokenType: COMMA,
 				lexeme:    lexer.lexeme,
 			})
 			continue L
+		// TODO
 		case "s":
 		case "S":
 			//sleep
+		// TODO
 		case "(":
-		//case ";":
-		//	continue L
+			continue L
+		case ".":
+			lexer.addToken(lexer.reapeater())
+			continue L
 		default:
 		}
 	}
@@ -116,6 +124,18 @@ func (l *Lexer) addToken(token Token) {
 
 func (l *Lexer) scanningError(token Token) {
 	fmt.Println("Error at line ", l.position)
+}
+
+func (l *Lexer) reapeater() Token {
+	ahead := l.lookahead(1)
+	if ahead == "." {
+		l.advance()
+		return Token{
+			tokenType: REPEATER,
+			lexeme:    l.lexeme,
+		}
+	}
+	return Token{}
 }
 
 func (l *Lexer) year() Token {
