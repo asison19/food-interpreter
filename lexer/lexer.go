@@ -48,8 +48,6 @@ L:
 		case isNumber(c): // MONTHANDDAY or TIME
 			lexer.addToken(lexer.number())
 			continue L
-		default:
-			//fmt.Println(string(c))
 		}
 
 		switch c {
@@ -73,16 +71,16 @@ L:
 			})
 			continue L
 		// TODO
-		case "s":
-		case "S":
-			//sleep
-		// TODO
 		case "(":
 			continue L
 		case ".":
 			lexer.addToken(lexer.reapeater())
 			continue L
-		default:
+		}
+
+		// Food, variables, sleep, etc.
+		if isAlpha(c) {
+			lexer.addToken(lexer.identifier())
 		}
 	}
 	lexer.clearLine()
@@ -151,6 +149,31 @@ func (l *Lexer) year() Token {
 	}
 }
 
+func (l *Lexer) identifier() Token {
+	ahead := l.lookahead(1)
+
+	for isAlphaNumeric(ahead) {
+		l.advance()
+		ahead = l.lookahead(1)
+	}
+
+	tokenType, ok := reservedWords[l.lexeme]
+
+	// TODO variables, and food is a literal?
+	// FOOD
+	if !ok {
+		return Token{
+			tokenType: FOOD,
+			lexeme:    l.lexeme,
+		}
+	}
+
+	return Token{
+		tokenType: tokenType,
+		lexeme:    l.lexeme,
+	}
+}
+
 // TODO certain dates should not be possible
 // E.g. 0/0, 1/32, etc.
 func (l *Lexer) number() Token {
@@ -197,11 +220,10 @@ func isNumber(c string) bool {
 	return false
 }
 
-func isLetter(c string) bool {
-	isAlpha := regexp.MustCompile(`^[A-Za-z]+$`).MatchString
-	return isAlpha(c)
+func isAlpha(c string) bool {
+	return regexp.MustCompile(`^[A-Za-z]+$`).MatchString(c)
 }
 
 func isAlphaNumeric(c string) bool {
-	return isLetter(c) && isNumber(c)
+	return isAlpha(c) || isNumber(c)
 }

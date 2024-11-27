@@ -25,12 +25,16 @@ MonthAndDay --> Time
 
 Time --> Food
 Time --> Repeater
+Time --> Sleep
 
 Food --> Comma
 Food --> Semicolon
 
 Repeater --> Semicolon
 Repeater --> Comma
+
+Sleep --> Comma
+Sleep --> Semicolon
 
 Comma --> Food
 
