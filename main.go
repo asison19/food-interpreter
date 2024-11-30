@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"food-interpreter/lexer"
 	"os"
 )
@@ -12,18 +10,5 @@ func main() {
 	args := os.Args[1:]
 
 	// TODO command line args
-	scanFile(args[0])
-}
-
-// TODO error handling
-func scanFile(filePath string) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	lexer.ScanTokens(scanner)
+	lexer.LexFile(args[0])
 }

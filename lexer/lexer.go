@@ -3,6 +3,7 @@ package lexer
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,6 +17,19 @@ type Lexer struct {
 	lexeme       string
 	line         string
 	tokens       []Token
+}
+
+// TODO error handling
+func LexFile(filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	ScanTokens(scanner)
 }
 
 func ScanTokens(scanner *bufio.Scanner) {
@@ -156,7 +170,8 @@ func (l *Lexer) identifier() Token {
 		ahead = l.lookahead(1)
 	}
 
-	tokenType, ok := reservedWords[l.lexeme]
+	// To simplify end user experience, reserved words are kept case insensitive
+	tokenType, ok := reservedWords[strings.ToLower(l.lexeme)]
 
 	// FOOD
 	if !ok {
@@ -174,6 +189,8 @@ func (l *Lexer) identifier() Token {
 
 // TODO certain dates should not be possible
 // E.g. 0/0, 1/32, etc.
+// TODO Certain times should not be possible
+// 0000 - 2359 only
 func (l *Lexer) number() Token {
 	ahead := l.lookahead(1)
 
