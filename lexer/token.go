@@ -13,6 +13,9 @@ const (
 	REPEATER
 	COMMA
 	SLEEP
+	// TODO
+	//LEFT_PAREN
+	//RIGHT_PAREN
 )
 
 type Token struct {

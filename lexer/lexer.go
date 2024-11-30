@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	//"unicode"
 )
 
 // TODO current location of the file?
@@ -20,7 +19,7 @@ type Lexer struct {
 }
 
 func ScanTokens(scanner *bufio.Scanner) {
-	lexer := Lexer{0, 0, 0, "", "", []Token{}} // TODO add stuff to lexer
+	lexer := Lexer{0, 0, 0, "", "", []Token{}}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -159,7 +158,6 @@ func (l *Lexer) identifier() Token {
 
 	tokenType, ok := reservedWords[l.lexeme]
 
-	// TODO variables, and food is a literal?
 	// FOOD
 	if !ok {
 		return Token{
@@ -189,7 +187,7 @@ func (l *Lexer) number() Token {
 		l.advance()
 		day := l.lookahead(1)
 		if day == "\n" {
-			fmt.Println("End of file reading number", bufio.ErrBufferFull) // TODO what is this again, ErrBufferFull?
+			fmt.Println("End of file reading number", bufio.ErrBufferFull)
 		}
 
 		if !isNumber(day) {
