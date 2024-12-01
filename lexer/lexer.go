@@ -3,6 +3,7 @@ package lexer
 import (
 	"bufio"
 	"fmt"
+	"food-interpreter/errorhandler"
 	"os"
 	"regexp"
 	"strconv"
@@ -77,6 +78,7 @@ L:
 				tokenType: SEMICOLON,
 				lexeme:    lexer.lexeme,
 			})
+			continue L
 		case ",": // COMMA
 			lexer.addToken(Token{
 				tokenType: COMMA,
@@ -94,6 +96,9 @@ L:
 		// Food, variables, sleep, etc.
 		if isAlpha(c) {
 			lexer.addToken(lexer.identifier())
+		} else {
+			lexer.reportError()
+			break
 		}
 	}
 	lexer.clearLine()
@@ -226,6 +231,12 @@ func (l *Lexer) number() Token {
 		//lexeme:
 		lexeme: l.lexeme,
 	}
+}
+
+func (l *Lexer) reportError() {
+	// Any error we get, just skip the rest of the line
+	errorhandler.ReportErrorLexer(fmt.Sprintf("invalid character %s", l.lexeme), l.linePosition+1, l.position)
+	l.clearLexeme()
 }
 
 func isNumber(c string) bool {
