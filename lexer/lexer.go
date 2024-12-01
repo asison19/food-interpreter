@@ -97,12 +97,12 @@ L:
 		if isAlpha(c) {
 			lexer.addToken(lexer.identifier())
 		} else {
-			lexer.reportError()
+			lexer.reportError(fmt.Sprintf("invalid character %s", lexer.lexeme))
 			break
 		}
 	}
 	lexer.clearLine()
-	fmt.Println("End of line, lexer.tokens", lexer.tokens)
+	fmt.Println("lexer.tokens", lexer.tokens)
 }
 
 func (l *Lexer) advance() string {
@@ -115,8 +115,6 @@ func (l *Lexer) advance() string {
 	return c
 }
 
-// Used to ignore certain tokens
-// TODO potentially just use a lookahead?
 func (l *Lexer) clearLexeme() {
 	l.lexeme = ""
 }
@@ -133,6 +131,7 @@ func (l *Lexer) lookahead(amount int) string {
 	return l.line[l.position : l.position+amount]
 }
 
+// TODO if token is empty, it's invalid and the rest of the line should be skipped
 func (l *Lexer) addToken(token Token) {
 	l.tokens = append(l.tokens, token)
 	l.lexeme = ""
@@ -151,6 +150,7 @@ func (l *Lexer) reapeater() Token {
 			lexeme:    l.lexeme,
 		}
 	}
+	l.reportError(fmt.Sprintf("Unexpected character %s when lexing token REPEATER, lexeme: ", l.lexeme))
 	return Token{}
 }
 
@@ -194,38 +194,76 @@ func (l *Lexer) identifier() Token {
 
 // TODO certain dates should not be possible
 // E.g. 0/0, 1/32, etc.
-// TODO Certain times should not be possible
-// 0000 - 2359 only
+// Certain times are not possible:
+//   0000 - 2359 only
 func (l *Lexer) number() Token {
 	ahead := l.lookahead(1)
 
+	d := 1
 	for isNumber(ahead) {
+		d += 1
 		l.advance()
 		ahead = l.lookahead(1)
 	}
 
+	if d > 4 {
+		l.reportError(fmt.Sprintf("Invalid digit count of %d found when lexing token TIME, lexeme: %s", d, l.lexeme))
+		return Token{}
+	}
+
 	// Month
 	if strings.Contains(ahead, "/") {
+		m, _ := strconv.Atoi(l.lexeme)
+		if m > 12 {
+			l.reportError(fmt.Sprintf("Invalid month, %d, found when lexing token MONTHANDDAY, lexeme: %s", m, l.lexeme))
+			return Token{}
+		}
+
 		l.advance()
 		day := l.lookahead(1)
 		if day == "\n" {
 			fmt.Println("End of file reading number", bufio.ErrBufferFull)
 		}
-
 		if !isNumber(day) {
-			fmt.Println("Error, no day given in MonthAndDay token")
+			l.reportError(fmt.Sprintf("Expected int, found %s while lexing day portion of token, MONTHANDDAY.", l.lexeme))
 			return Token{}
 		}
 		for isNumber(day) {
 			l.advance()
 			day = l.lookahead(1)
 		}
+
+		d, _ := strconv.Atoi(day)
+
+		if d > 31 {
+			l.reportError(fmt.Sprintf("Invalid day over 32, found %s while lexing day portion of token, MONTHANDDAY.", l.lexeme))
+			return Token{}
+		}
+
 		return Token{
 			tokenType: MONTHANDDAY,
 			//lexeme:
 			lexeme: l.lexeme,
 		}
 	}
+
+	// TIME
+	time, err := strconv.Atoi(l.lexeme)
+	if err != nil {
+		l.reportError(fmt.Sprintf("Invalid TIME, found %s when lexing token TIME, lexeme: ", l.lexeme))
+		return Token{}
+	}
+
+	if time < 0 || time > 2359 {
+		l.reportError(fmt.Sprintf("Invalid TIME given, found when lexing token TIME, lexeme: %s ", l.lexeme))
+		return Token{}
+	}
+
+	if minutes := time % 100; minutes < 0000 || minutes > 2359 {
+		l.reportError(fmt.Sprintf("Invalid minutes of TIME given, found when lexing token TIME, lexeme: %s ", l.lexeme))
+		return Token{}
+	}
+
 	return Token{
 		tokenType: TIME,
 		//lexeme:
@@ -233,9 +271,10 @@ func (l *Lexer) number() Token {
 	}
 }
 
-func (l *Lexer) reportError() {
+// TODO invalid line is sent
+func (l *Lexer) reportError(err string) {
 	// Any error we get, just skip the rest of the line
-	errorhandler.ReportErrorLexer(fmt.Sprintf("invalid character %s", l.lexeme), l.linePosition+1, l.position)
+	errorhandler.ReportErrorLexer(err, l.linePosition+1, l.position)
 	l.clearLexeme()
 }
 
