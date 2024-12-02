@@ -38,6 +38,7 @@ func ScanTokens(scanner *bufio.Scanner) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		lexer.linePosition += 1
 
 		fmt.Println("Line:", string(line))
 		scanLine(&lexer, string(line))
@@ -50,6 +51,7 @@ func scanLine(lexer *Lexer, line string) {
 
 	// TODO error handling
 	// TODO do I need this for loop?
+
 L:
 	for {
 		c := lexer.advance()
@@ -60,7 +62,9 @@ L:
 
 		switch {
 		case isNumber(c): // MONTHANDDAY or TIME
-			lexer.addToken(lexer.number())
+			if !lexer.addToken(lexer.number()) { // TODO is there a better way of doing this conditional?
+				break
+			}
 			continue L
 		}
 
@@ -68,38 +72,49 @@ L:
 		// Ignoreables
 		case " ":
 		case "\n":
+		case "\r":
 			lexer.clearLexeme()
 			continue L
 		case "y": // YEAR
-			lexer.addToken(lexer.year())
+			if !lexer.addToken(lexer.year()) {
+				break
+			}
 			continue L
 		case ";": // SEMICOLON
-			lexer.addToken(Token{
+			if !lexer.addToken(Token{
 				tokenType: SEMICOLON,
 				lexeme:    lexer.lexeme,
-			})
+			}) {
+				break
+			}
 			continue L
 		case ",": // COMMA
-			lexer.addToken(Token{
+			if !lexer.addToken(Token{
 				tokenType: COMMA,
 				lexeme:    lexer.lexeme,
-			})
+			}) {
+				break
+			}
 			continue L
 		// TODO
 		case "(":
 			continue L
 		case ".":
-			lexer.addToken(lexer.reapeater())
+			if !lexer.addToken(lexer.reapeater()) {
+				break
+			}
 			continue L
 		}
 
 		// Food, variables, sleep, etc.
 		if isAlpha(c) {
-			lexer.addToken(lexer.identifier())
-		} else {
-			lexer.reportError(fmt.Sprintf("invalid character %s", lexer.lexeme))
-			break
+			if !lexer.addToken(lexer.identifier()) {
+				break
+			}
 		}
+		// TODO end of line reporting incorrectly
+		lexer.reportError(fmt.Sprintf("Invalid token. lexeme: %s", lexer.lexeme))
+		break
 	}
 	lexer.clearLine()
 	fmt.Println("lexer.tokens", lexer.tokens)
@@ -131,10 +146,14 @@ func (l *Lexer) lookahead(amount int) string {
 	return l.line[l.position : l.position+amount]
 }
 
-// TODO if token is empty, it's invalid and the rest of the line should be skipped
-func (l *Lexer) addToken(token Token) {
+// TODO if token is empty, it's invalid and the entirety of the line should be skipped
+func (l *Lexer) addToken(token Token) bool {
+	if token == (Token{}) {
+		return false
+	}
 	l.tokens = append(l.tokens, token)
 	l.lexeme = ""
+	return true
 }
 
 func (l *Lexer) scanningError(token Token) {
@@ -207,25 +226,27 @@ func (l *Lexer) number() Token {
 	}
 
 	if d > 4 {
-		l.reportError(fmt.Sprintf("Invalid digit count of %d found when lexing token TIME, lexeme: %s", d, l.lexeme))
+		l.reportError(fmt.Sprintf("Invalid token. Invalid digit count of %d found. lexeme: %s", d, l.lexeme))
 		return Token{}
 	}
 
-	// Month
+	// MONTHANDDAY
 	if strings.Contains(ahead, "/") {
-		m, _ := strconv.Atoi(l.lexeme)
-		if m > 12 {
-			l.reportError(fmt.Sprintf("Invalid month, %d, found when lexing token MONTHANDDAY, lexeme: %s", m, l.lexeme))
+		// month
+		month, _ := strconv.Atoi(l.lexeme)
+		if month > 12 || month < 0 {
+			l.reportError(fmt.Sprintf("Invalid token, %d. Month must be between 1 and 12. lexeme: %s", month, l.lexeme))
 			return Token{}
 		}
 
+		// day
 		l.advance()
 		day := l.lookahead(1)
 		if day == "\n" {
 			fmt.Println("End of file reading number", bufio.ErrBufferFull)
 		}
 		if !isNumber(day) {
-			l.reportError(fmt.Sprintf("Expected int, found %s while lexing day portion of token, MONTHANDDAY.", l.lexeme))
+			l.reportError(fmt.Sprintf("Invalid token, %s. Day must be a number between 1 and 12. lexeme: %s", day, l.lexeme))
 			return Token{}
 		}
 		for isNumber(day) {
@@ -250,17 +271,17 @@ func (l *Lexer) number() Token {
 	// TIME
 	time, err := strconv.Atoi(l.lexeme)
 	if err != nil {
-		l.reportError(fmt.Sprintf("Invalid TIME, found %s when lexing token TIME, lexeme: ", l.lexeme))
+		l.reportError(fmt.Sprintf("Invalid token, %d. Found %s when lexing token TIME, lexeme: ", time, l.lexeme))
 		return Token{}
 	}
 
 	if time < 0 || time > 2359 {
-		l.reportError(fmt.Sprintf("Invalid TIME given, found when lexing token TIME, lexeme: %s ", l.lexeme))
+		l.reportError(fmt.Sprintf("Invalid token, %d. Time must be between 0 and 2359. lexeme: %s ", time, l.lexeme))
 		return Token{}
 	}
 
-	if minutes := time % 100; minutes < 0000 || minutes > 2359 {
-		l.reportError(fmt.Sprintf("Invalid minutes of TIME given, found when lexing token TIME, lexeme: %s ", l.lexeme))
+	if minutes := time % 100; minutes < 0 || minutes > 59 {
+		l.reportError(fmt.Sprintf("Invalid token %d. Minutes of time must be between 0 and 59 lexeme: %s ", time, l.lexeme))
 		return Token{}
 	}
 
@@ -274,7 +295,7 @@ func (l *Lexer) number() Token {
 // TODO invalid line is sent
 func (l *Lexer) reportError(err string) {
 	// Any error we get, just skip the rest of the line
-	errorhandler.ReportErrorLexer(err, l.linePosition+1, l.position)
+	errorhandler.ReportErrorLexer(err, l.linePosition, l.position)
 	l.clearLexeme()
 }
 
