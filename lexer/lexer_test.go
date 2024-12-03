@@ -4,7 +4,8 @@ import (
 	"testing"
 )
 
-// TODO these should all fail when including tokens that should be included, but are not
+// TODO these should all fail when including tokens that should be included, but are not.
+// TODO speed up testing by not having to make a syscall to open a file for every little thing.
 func TestLexerYear(t *testing.T) {
 	LexFile("../test/data/year.txt")
 }

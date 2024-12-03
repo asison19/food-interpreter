@@ -51,7 +51,6 @@ func scanLine(lexer *Lexer, line string) {
 
 	// TODO error handling
 	// TODO do I need this for loop?
-
 L:
 	for {
 		c := lexer.advance()
@@ -62,9 +61,7 @@ L:
 
 		switch {
 		case isNumber(c): // MONTHANDDAY or TIME
-			if !lexer.addToken(lexer.number()) { // TODO is there a better way of doing this conditional?
-				break
-			}
+			lexer.addToken(lexer.number())
 			continue L
 		}
 
@@ -76,41 +73,32 @@ L:
 			lexer.clearLexeme()
 			continue L
 		case "y": // YEAR
-			if !lexer.addToken(lexer.year()) {
-				break
-			}
+			lexer.addToken(lexer.year())
 			continue L
 		case ";": // SEMICOLON
-			if !lexer.addToken(Token{
+			lexer.addToken(Token{
 				tokenType: SEMICOLON,
 				lexeme:    lexer.lexeme,
-			}) {
-				break
-			}
+			})
 			continue L
 		case ",": // COMMA
-			if !lexer.addToken(Token{
+			lexer.addToken(Token{
 				tokenType: COMMA,
 				lexeme:    lexer.lexeme,
-			}) {
-				break
-			}
+			})
 			continue L
 		// TODO
 		case "(":
 			continue L
 		case ".":
-			if !lexer.addToken(lexer.reapeater()) {
-				break
-			}
+			lexer.addToken(lexer.reapeater())
 			continue L
 		}
 
 		// Food, variables, sleep, etc.
 		if isAlpha(c) {
-			if !lexer.addToken(lexer.identifier()) {
-				break
-			}
+			lexer.addToken(lexer.identifier())
+			continue L
 		}
 		// TODO end of line reporting incorrectly
 		lexer.reportError(fmt.Sprintf("Invalid token. lexeme: %s", lexer.lexeme))
@@ -146,14 +134,9 @@ func (l *Lexer) lookahead(amount int) string {
 	return l.line[l.position : l.position+amount]
 }
 
-// TODO if token is empty, it's invalid and the entirety of the line should be skipped
-func (l *Lexer) addToken(token Token) bool {
-	if token == (Token{}) {
-		return false
-	}
+func (l *Lexer) addToken(token Token) {
 	l.tokens = append(l.tokens, token)
 	l.lexeme = ""
-	return true
 }
 
 func (l *Lexer) scanningError(token Token) {
