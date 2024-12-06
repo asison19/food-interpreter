@@ -269,10 +269,20 @@ func (l *Lexer) number() Token {
 	}
 }
 
-// TODO what to do after reporting a bad token? skip to next whitespace?
+// TODO this is going to skip some valid tokens that don't need to seperated by spaces such as commas
 func (l *Lexer) reportError(err string) {
 	errorhandler.ReportErrorLexer(err, l.linePosition, l.position)
-	l.clearLexeme()
+	for {
+		c := l.advance()
+		if c == "" {
+			break
+		}
+		switch c {
+		case " ", "\n", "\r": // TODO make a list for these
+			l.clearLexeme()
+			return
+		}
+	}
 }
 
 func isNumber(c string) bool {
