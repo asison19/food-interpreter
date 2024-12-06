@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-// TODO current location of the file?
 type Lexer struct {
 	position     int
 	nextPosition int
@@ -20,7 +19,6 @@ type Lexer struct {
 	tokens       []Token
 }
 
-// TODO error handling
 func LexFile(filePath string) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -50,7 +48,6 @@ func scanLine(lexer *Lexer, line string) {
 	lexer.line = line
 
 	// TODO error handling
-	// TODO do I need this for loop?
 L:
 	for {
 		c := lexer.advance()
@@ -67,9 +64,7 @@ L:
 
 		switch c {
 		// Ignoreables
-		case " ":
-		case "\n":
-		case "\r":
+		case " ", "\n", "\r":
 			lexer.clearLexeme()
 			continue L
 		case "y": // YEAR
@@ -100,7 +95,7 @@ L:
 			lexer.addToken(lexer.identifier())
 			continue L
 		}
-		// TODO end of line reporting incorrectly
+
 		lexer.reportError(fmt.Sprintf("Invalid token. lexeme: %s", lexer.lexeme))
 		break
 	}
@@ -123,7 +118,7 @@ func (l *Lexer) clearLexeme() {
 }
 
 func (l *Lexer) clearLine() {
-	l.line = "" // TODO probably don't need, but leave just in case?
+	l.line = ""
 	l.position = 0
 }
 
@@ -275,9 +270,8 @@ func (l *Lexer) number() Token {
 	}
 }
 
-// TODO invalid line is sent
+// TODO what to do after reporting a bad token? skip to next whitespace?
 func (l *Lexer) reportError(err string) {
-	// Any error we get, just skip the rest of the line
 	errorhandler.ReportErrorLexer(err, l.linePosition, l.position)
 	l.clearLexeme()
 }
