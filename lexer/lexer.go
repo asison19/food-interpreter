@@ -189,7 +189,6 @@ func (l *Lexer) identifier() Token {
 	}
 }
 
-// TODO certain dates should not be possible
 // E.g. 0/0, 1/32, etc.
 // Certain times are not possible:
 //   0000 - 2359 only
@@ -212,7 +211,7 @@ func (l *Lexer) number() Token {
 	if strings.Contains(ahead, "/") {
 		// month
 		month, _ := strconv.Atoi(l.lexeme)
-		if month > 12 || month < 0 {
+		if month > 12 || month < 1 {
 			l.reportError(fmt.Sprintf("Invalid token, %d. Month must be between 1 and 12. lexeme: %s", month, l.lexeme))
 			return Token{}
 		}
