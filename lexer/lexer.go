@@ -19,19 +19,19 @@ type Lexer struct {
 	tokens       []Token
 }
 
-func LexFile(filePath string) {
+func LexFile(filePath string) Lexer {
 	file, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return Lexer{}
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	ScanTokens(scanner)
+	return ScanTokens(scanner)
 }
 
-func ScanTokens(scanner *bufio.Scanner) {
+func ScanTokens(scanner *bufio.Scanner) Lexer {
 	lexer := Lexer{0, 0, 0, "", "", []Token{}}
 
 	for scanner.Scan() {
@@ -42,6 +42,7 @@ func ScanTokens(scanner *bufio.Scanner) {
 		scanLine(&lexer, string(line))
 	}
 
+	return lexer
 }
 
 func scanLine(lexer *Lexer, line string) {
