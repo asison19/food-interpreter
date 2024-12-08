@@ -3,7 +3,7 @@ package lexer
 import (
 	"bufio"
 	"fmt"
-	"food-interpreter/errorhandler"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -22,7 +22,7 @@ type Lexer struct {
 func LexFile(filePath string) Lexer {
 	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return Lexer{}
 	}
 	defer file.Close()
@@ -38,7 +38,6 @@ func ScanTokens(scanner *bufio.Scanner) Lexer {
 		line := scanner.Text()
 		lexer.linePosition += 1
 
-		fmt.Println("Line:", string(line))
 		scanLine(&lexer, string(line))
 	}
 
@@ -64,8 +63,7 @@ L:
 		}
 
 		switch c {
-		// Ignoreables
-		case " ", "\n", "\r":
+		case " ", "\n", "\r": // ignorables
 			lexer.clearLexeme()
 			continue L
 		case "y": // YEAR
@@ -101,7 +99,6 @@ L:
 		break
 	}
 	lexer.clearLine()
-	fmt.Println("lexer.tokens", lexer.tokens)
 }
 
 func (l *Lexer) advance() string {
@@ -133,10 +130,6 @@ func (l *Lexer) lookahead(amount int) string {
 func (l *Lexer) addToken(token Token) {
 	l.tokens = append(l.tokens, token)
 	l.lexeme = ""
-}
-
-func (l *Lexer) scanningError(token Token) {
-	fmt.Println("Error at line ", l.position)
 }
 
 func (l *Lexer) reapeater() Token {
@@ -221,7 +214,7 @@ func (l *Lexer) number() Token {
 		l.advance()
 		day := l.lookahead(1)
 		if day == "\n" {
-			fmt.Println("End of file reading number", bufio.ErrBufferFull)
+			log.Println("End of file reading number: ", bufio.ErrBufferFull)
 		}
 		if !isNumber(day) {
 			l.reportError(fmt.Sprintf("Invalid token, %s. Day must be a number between 1 and 12. lexeme: %s", day, l.lexeme))
@@ -272,7 +265,9 @@ func (l *Lexer) number() Token {
 
 // TODO this is going to skip some valid tokens that don't need to seperated by spaces such as commas
 func (l *Lexer) reportError(err string) {
-	errorhandler.ReportErrorLexer(err, l.linePosition, l.position)
+	log.Printf("Lexical error: %s in line: %d, index: %d", err, l.linePosition, l.position)
+
+	// Advance to the next intentional token
 	for {
 		c := l.advance()
 		if c == "" {
