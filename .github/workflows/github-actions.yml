@@ -11,5 +11,7 @@ jobs:
         uses: actions/setup-go@v5.1.0
         with:
           go-version: '1.23.0'
+          cache-dependency-path: "**/*.sum"
+          cache: true
       - name: Run Lexer tests
         run: cd lexer && go test -v
