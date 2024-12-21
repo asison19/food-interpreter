@@ -3,12 +3,12 @@
 
 left to right direction
 
-[*] --> Year
+[*] --> Year : "\d+"
 
-Year --> Semicolon
+Year --> Semicolon : ";"
 Year --> EOL
 
-Semicolon --> EOL
+Semicolon --> EOL : "EOL"
 
 EOL --> [*]
 
@@ -19,27 +19,27 @@ EOL --> [*]
 
 left to right direction
 
-[*] --> MonthAndDay
+[*] --> MonthAndDay : "mm/dd"
 
-MonthAndDay --> Time
+MonthAndDay --> Time : "0000-2359"
 
-Time --> Food
-Time --> Repeater
-Time --> Sleep
+Time --> Food : "\S+\s*"
+Time --> Repeater : ".."
+Time --> Sleep : "sleep"
 
-Food --> Comma
-Food --> Semicolon
+Food --> Comma : ","
+Food --> Semicolon : ";"
 
-Repeater --> Semicolon
-Repeater --> Comma
+Repeater --> Semicolon : ";"
+Repeater --> Comma : ","
 
-Sleep --> Comma
-Sleep --> Semicolon
+Sleep --> Comma : ","
+Sleep --> Semicolon : ";"
 
-Comma --> Food
+Comma --> Food : "\S+\s*"
 
-Semicolon --> Time
-Semicolon --> EOL
+Semicolon --> Time : "0000-2359"
+Semicolon --> EOL : "EOL"
 
 EOL --> [*]
 
@@ -50,7 +50,7 @@ EOL --> [*]
 
 left to right direction
 
-[*] --> Comments
+[*] --> Comments : "//"
 
 Comments --> EOL
 

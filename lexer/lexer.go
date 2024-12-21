@@ -87,6 +87,9 @@ L:
 		case ".":
 			lexer.addToken(lexer.reapeater())
 			continue L
+
+			// TODO
+			// case "/":
 		}
 
 		// Food, variables, sleep, etc.
