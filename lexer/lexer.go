@@ -19,6 +19,7 @@ type Lexer struct {
 	tokens       []Token
 }
 
+// TODO API endpoint to send JSON request of the payload.
 func LexFile(filePath string) Lexer {
 	file, err := os.Open(filePath)
 	if err != nil {
