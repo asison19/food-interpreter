@@ -23,8 +23,20 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+<<<<<<< HEAD
       - name: Run Terraform Plan
         run: terraform plan
       - name: Run Terraform Apply
         run: terraform apply
+=======
+      - name: Run Terraform Init
+        run: terraform init
+        working-directory: ${{ github.workspace }}/iac/terraform
+      - name: Run Terraform Plan
+        run: terraform plan
+        working-directory: ${{ github.workspace }}/iac/terraform
+      - name: Run Terraform Apply
+        run: terraform apply
+        working-directory: ${{ github.workspace }}/iac/terraform
+>>>>>>> terraform-setup
   
