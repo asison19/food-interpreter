@@ -19,7 +19,7 @@ jobs:
         with:
           create_credentials_file: true
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Setup Terraform
@@ -47,7 +47,7 @@ jobs:
         with:
           create_credentials_file: true
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
       - name: Setup Terraform
