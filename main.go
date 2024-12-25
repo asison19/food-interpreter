@@ -1,14 +1,47 @@
 package main
 
 import (
+	"encoding/json"
 	"food-interpreter/lexer"
-	"os"
+	"net/http"
 )
+
+//type LexerPost struct {
+//	Diary string `json:"diary,string,omitempty"`
+//}
+
+func lexerHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var p struct {
+			Diary string `json:"diary"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		l := lexer.LexString(p.Diary)
+
+		tokenBytes, err2 := json.Marshal(l.Tokens)
+		if err2 != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Write(tokenBytes) // TODO this outputs empty
+	})
+}
 
 func main() {
 
-	args := os.Args[1:]
+	mux := http.NewServeMux()
+
+	lh := lexerHandler()
+	mux.Handle("/lexer", lh)
+
+	http.ListenAndServe(":8080", mux)
+	//args := os.Args[1:]
 
 	// TODO command line args
-	lexer.LexFile(args[0])
+	//lexer.LexFile(args[0])
 }

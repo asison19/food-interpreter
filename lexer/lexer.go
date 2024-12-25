@@ -16,10 +16,9 @@ type Lexer struct {
 	linePosition int
 	lexeme       string
 	line         string
-	tokens       []Token
+	Tokens       []Token
 }
 
-// TODO API endpoint to send JSON request of the payload.
 func LexFile(filePath string) Lexer {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -29,6 +28,11 @@ func LexFile(filePath string) Lexer {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	return ScanTokens(scanner)
+}
+
+func LexString(s string) Lexer {
+	scanner := bufio.NewScanner(strings.NewReader(s))
 	return ScanTokens(scanner)
 }
 
@@ -132,7 +136,7 @@ func (l *Lexer) lookahead(amount int) string {
 }
 
 func (l *Lexer) addToken(token Token) {
-	l.tokens = append(l.tokens, token)
+	l.Tokens = append(l.Tokens, token)
 	l.lexeme = ""
 }
 
