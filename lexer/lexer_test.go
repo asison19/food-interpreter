@@ -25,7 +25,7 @@ func TestLexerYear(t *testing.T) {
 		{YEAR, "y0"},
 	}
 	actual := LexFile("test/data/year.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerSemicolon(t *testing.T) {
@@ -34,7 +34,7 @@ func TestLexerSemicolon(t *testing.T) {
 		expected = append(expected, Token{SEMICOLON, ";"})
 	}
 	actual := LexFile("test/data/semicolon.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerMonthAndDay(t *testing.T) {
@@ -47,7 +47,7 @@ func TestLexerMonthAndDay(t *testing.T) {
 		{MONTHANDDAY, "9/10"},
 	}
 	actual := LexFile("test/data/monthandday.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerTime(t *testing.T) {
@@ -57,7 +57,7 @@ func TestLexerTime(t *testing.T) {
 		{TIME, "2359"},
 	}
 	actual := LexFile("test/data/time.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerFood(t *testing.T) {
@@ -69,7 +69,7 @@ func TestLexerFood(t *testing.T) {
 		{FOOD, "elderberry"},
 	}
 	actual := LexFile("test/data/food.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerRepeater(t *testing.T) {
@@ -79,7 +79,7 @@ func TestLexerRepeater(t *testing.T) {
 	}
 
 	actual := LexFile("test/data/repeater.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerComma(t *testing.T) {
@@ -88,7 +88,7 @@ func TestLexerComma(t *testing.T) {
 		expected = append(expected, Token{COMMA, ","})
 	}
 	actual := LexFile("test/data/comma.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 func TestLexerSleep(t *testing.T) {
@@ -100,7 +100,7 @@ func TestLexerSleep(t *testing.T) {
 		{SLEEP, "sLeEp"},
 	}
 	actual := LexFile("test/data/sleep.txt")
-	assertEqual(t, expected, actual.tokens)
+	assertEqual(t, expected, actual.Tokens)
 }
 
 // TODO error handling test(s)
