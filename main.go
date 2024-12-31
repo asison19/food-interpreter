@@ -28,7 +28,7 @@ func lexerHandler() http.Handler {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		w.Write(tokenBytes) // TODO this outputs empty
+		w.Write(tokenBytes)
 	})
 }
 

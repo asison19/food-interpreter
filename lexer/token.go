@@ -19,11 +19,11 @@ const (
 )
 
 type Token struct {
-	tokenType int
+	TokenType int
 	//lexeme    string
-	lexeme string
+	Lexeme string
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.tokenType, t.lexeme)
+	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.TokenType, t.Lexeme)
 }
