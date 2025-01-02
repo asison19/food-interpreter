@@ -33,15 +33,10 @@ func lexerHandler() http.Handler {
 }
 
 func main() {
-
 	mux := http.NewServeMux()
-
 	lh := lexerHandler()
+
 	mux.Handle("/lexer", lh)
 
 	http.ListenAndServe(":8080", mux)
-	//args := os.Args[1:]
-
-	// TODO command line args
-	//lexer.LexFile(args[0])
 }
