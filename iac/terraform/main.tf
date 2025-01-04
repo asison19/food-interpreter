@@ -1,3 +1,5 @@
+// TODO GKE
+
 resource "google_pubsub_topic" "example" {
   name = "food-interpreter-lexer"
 

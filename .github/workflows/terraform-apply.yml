@@ -1,3 +1,4 @@
+# TODO turn this into a reusable action/module
 name: 'Terraform Apply'
 run-name: 'Terraform Apply'
 on: workflow_dispatch 
@@ -55,5 +56,3 @@ jobs:
       - name: Run Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ${{ github.workspace }}/iac/terraform
-  
-  
