@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket  = var.GCP_STATE_BUCKET
+    bucket  = "95fa2a619dd6f929-terraform-remote-backend"
     prefix  = "terraform/state"
   }
 }
