@@ -20,13 +20,10 @@ jobs:
           create_credentials_file: true
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Run Terraform Init
-        run: terraform init
-        working-directory: ${{ github.workspace }}/iac/terraform
+      - name: Terraform action
+        uses: asison19/github-actions/terraform-action.yml
+        with:
+          working_directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Plan
         run: terraform plan
         working-directory: ${{ github.workspace }}/iac/terraform
