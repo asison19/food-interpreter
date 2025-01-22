@@ -21,7 +21,7 @@ jobs:
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
       - name: Terraform action
-        uses: asison19/github-actions/terraform-action.yml
+        uses: asison19/github-actions/terraform-action.yml@master # TODO version this repo
         with:
           working_directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Plan
