@@ -23,7 +23,7 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@master # TODO version this repo
         with:
-          working_directory: ${{ github.workspace }}/iac/terraform
+          working-directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Plan
         run: terraform plan
         working-directory: ${{ github.workspace }}/iac/terraform
