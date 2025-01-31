@@ -6,29 +6,16 @@ env:
   CONFIG_DIRECTORY: "./"
 jobs:
   terraform-plan:
+    uses: asison19/github-actions/.github/workflows/gcp-terraform-plan.yml@v1
     environment: prod
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Github Actions checkout
-        uses: actions/checkout@v4.2.2
-      - name: Setup Workload Identity Federation
-        uses: google-github-actions/auth@v2
-        with:
-          create_credentials_file: true
-          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-      - name: Terraform action
-        uses: asison19/github-actions/composite-actions/terraform-action@v1.0.0
-        with:
-          working-directory: ${{ github.workspace }}/iac/terraform
-      - name: Run Terraform Plan
-        run: terraform plan
-        working-directory: ${{ github.workspace }}/iac/terraform
-        env:
-          TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+    with:
+      gcp-wif-project-number: ${{ vars.GCP_WIF_PROJECT_NUMBER }}
+      pool-id: ${{ vars.POOL_ID }}
+      provider-id: ${{ vars.PROVIDER_ID }}
+      working-directory: ${{ github.workspace }}/iac/terraform
+      gcp-project-id: ${{ vars.GCP_PROJECT_ID }}
+    secrets:
+      gcp-service-account-email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
   terraform-apply:
     needs: terraform-plan
     environment: prod
