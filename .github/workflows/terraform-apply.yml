@@ -6,7 +6,7 @@ env:
   CONFIG_DIRECTORY: "./"
 jobs:
   terraform-plan:
-    uses: asison19/github-actions/.github/workflows/gcp-terraform-plan.yml@v1.1.3
+    uses: asison19/github-actions/.github/workflows/gcp-terraform-plan.yml@v1.1.5
     with:
       gcp-wif-project-number: ${{ vars.GCP_WIF_PROJECT_NUMBER }}
       pool-id: ${{ vars.POOL_ID }}
