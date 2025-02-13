@@ -3,6 +3,10 @@ run-name: 'Push Docker Image'
 on: workflow_dispatch
 jobs:
   push-docker-image:
+    environment: prod
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     runs-on: ubuntu-latest
     steps:
       - name: Setup Github Actions checkout
