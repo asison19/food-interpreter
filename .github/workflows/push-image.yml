@@ -1,0 +1,28 @@
+name: 'Push Docker Image'
+run-name: 'Push Docker Image'
+on: workflow_dispatch
+jobs:
+  push-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build Docker Image
+        run: docker build -t food-interpreter .
+      - name: Setup Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          create_credentials_file: true
+          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+      - name: Login to GCR
+        uses: docker/login-action@v3
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+      - name: Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter/food-interpreter:latest
