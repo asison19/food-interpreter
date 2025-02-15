@@ -1,3 +1,4 @@
+# TODO look into requiring the other two workflows to pass.
 name: 'Push Docker Image'
 run-name: 'Push Docker Image'
 on: workflow_dispatch
@@ -30,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter/food-interpreter:latest
+          tags: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
