@@ -15,7 +15,7 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          create_credentials_file: true
+          token_format: access_token
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
       - name: Build Docker Image
