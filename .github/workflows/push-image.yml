@@ -1,9 +1,14 @@
 # TODO look into requiring the other two workflows to pass.
 name: 'Push Docker Image'
 run-name: 'Push Docker Image'
-on: workflow_dispatch
+on:
+  workflow_run:
+    workflows: [Run Lexer Tests] # TODO this will cause a race condition of the Infra deploy hasn't created the GAR repo yet.
+    types:
+      - completed
 jobs:
   push-docker-image:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: prod
     permissions:
       contents: 'read'
@@ -32,3 +37,9 @@ jobs:
         with:
           push: true
           tags: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
+  echo-failure:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The Lexer Tests failed. Pushing docker image to GAR cancelled."
