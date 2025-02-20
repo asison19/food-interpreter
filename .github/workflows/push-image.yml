@@ -24,8 +24,10 @@ jobs:
           token_format: access_token
           workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+      - name: Get Short GitHub SHA
+        run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Build Docker Image
-        run: docker build -t food-interpreter .
+        run: 'docker build -t food-interpreter:${{ env.SHA_SHORT }} .'
       - name: Login to GAR
         uses: docker/login-action@v3
         with:
