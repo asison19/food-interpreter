@@ -45,7 +45,7 @@ data "google_iam_policy" "lexer" {
   binding {
     role = "roles/viewer" # TODO give it the roles it needs later on.
     members = [
-      google_service_account.lexer_cloud_run.email,
+      "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
     ]
   }
 }
