@@ -1,7 +1,7 @@
 // TODO GKE
 
 data "google_project" "project" {
-  id   = var.GCP_PROJECT_ID
+  project_id = var.GCP_PROJECT_ID
 }
 
 # TODO look into automatically deleting images.
@@ -47,7 +47,7 @@ resource "google_cloud_run_service_iam_binding" "binding" {
   location = google_cloud_run_v2_service.lexer.location
   service  = google_cloud_run_v2_service.lexer.name
   role     = "roles/run.invoker"
-  members  = ["serviceAccount:${google_service_account.lexer_cloud_run.email}"]
+  members  = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
@@ -59,7 +59,7 @@ resource "google_project_service_identity" "pubsub_agent" {
 resource "google_project_iam_binding" "project_token_creator" {
   project = data.google_project.project.project_id
   role    = "roles/iam.serviceAccountTokenCreator"
-  members = ["serviceAccount:${google_project_service_identity.pubsub_agent.email}"]
+  members = ["serviceAccount:${ google_project_service_identity.pubsub_agent.email }"]
 }
 
 # TODO do I still need this?
