@@ -1,5 +1,9 @@
 // TODO GKE
 
+data "google_project" "project" {
+  id   = var.GCP_PROJECT_ID
+}
+
 # TODO look into automatically deleting images.
 resource "google_artifact_registry_repository" "food-interpreter-repository" {
   location      = "us-central1"
