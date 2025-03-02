@@ -43,11 +43,20 @@ resource "google_service_account" "lexer_cloud_run" {
   display_name = "Lexer Cloud Run Service Account"
 }
 
-resource "google_cloud_run_service_iam_binding" "binding" {
-  location = google_cloud_run_v2_service.lexer.location
-  service  = google_cloud_run_v2_service.lexer.name
-  role     = "roles/run.invoker"
-  members  = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
+resource "google_cloud_run_v2_service_iam_policy" "lexer" {
+  project     = google_cloud_run_v2_service.lexer.project
+  location    = google_cloud_run_v2_service.lexer.location
+  name        = google_cloud_run_v2_service.lexer.name
+  policy_data = data.google_iam_policy.lexer.policy_data
+}
+
+data "google_iam_policy" "lexer" {
+  binding {
+    role = "roles/run.servicesInvoker"
+    members = [
+      "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
+    ]
+  }
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
@@ -62,22 +71,6 @@ resource "google_project_iam_binding" "project_token_creator" {
   members = ["serviceAccount:${ google_project_service_identity.pubsub_agent.email }"]
 }
 
-data "google_iam_policy" "lexer" {
-  binding {
-    role = "roles/run.servicesInvoker"
-    members = [
-      "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
-    ]
-  }
-}
-
-resource "google_cloud_run_v2_service_iam_policy" "lexer" {
-  project     = google_cloud_run_v2_service.lexer.project
-  location    = google_cloud_run_v2_service.lexer.location
-  name        = google_cloud_run_v2_service.lexer.name
-  policy_data = data.google_iam_policy.lexer.policy_data
-}
-
 # TODO schema?
 resource "google_pubsub_topic" "lexer" {
   name = "lexer-topic"
@@ -90,22 +83,17 @@ resource "google_pubsub_topic" "lexer" {
 }
 
 resource "google_pubsub_subscription" "lexer" {
-  name  = "lexer-subscription"
-  topic = google_pubsub_topic.lexer.id
-
+  name                 = "lexer-subscription"
+  topic                = google_pubsub_topic.lexer.id
   ack_deadline_seconds = 20
-
   labels = {
     service = "lexer"
   }
-
   push_config {
     push_endpoint = google_cloud_run_v2_service.lexer.uri
-
     oidc_token {
       service_account_email = google_service_account.lexer_cloud_run.email
     }
-
     attributes = {
       x-goog-version = "v1"
     }
