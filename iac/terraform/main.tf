@@ -62,10 +62,9 @@ resource "google_project_iam_binding" "project_token_creator" {
   members = ["serviceAccount:${ google_project_service_identity.pubsub_agent.email }"]
 }
 
-# TODO do I still need this?
 data "google_iam_policy" "lexer" {
   binding {
-    role = "roles/viewer" # TODO give it the roles it needs later on.
+    role = "roles/run.servicesInvoker"
     members = [
       "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
     ]
@@ -90,7 +89,7 @@ resource "google_pubsub_topic" "lexer" {
   message_retention_duration = "86000s"
 }
 
-resource "google_pubsub_subscription" "example" {
+resource "google_pubsub_subscription" "lexer" {
   name  = "lexer-subscription"
   topic = google_pubsub_topic.lexer.id
 
