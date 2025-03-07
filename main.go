@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"food-interpreter/lexer"
+	"log"
 	"net/http"
+	"os"
 )
 
 //type LexerPost struct {
@@ -38,5 +40,14 @@ func main() {
 
 	mux.Handle("/lexer", lh)
 
-	http.ListenAndServe(":8080", mux)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
+		log.Fatal(err)
+	}
 }
