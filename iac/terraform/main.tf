@@ -32,6 +32,7 @@ resource "google_cloud_run_v2_service" "lexer" {
       resources {
         limits = {
           memory = "1024Mi"
+          cpu    = "1000m"
         }
       }
     }
