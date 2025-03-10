@@ -90,7 +90,7 @@ resource "google_pubsub_subscription" "lexer" {
     service = "lexer"
   }
   push_config {
-    push_endpoint = google_cloud_run_v2_service.lexer.uri
+    push_endpoint = "${ google_cloud_run_v2_service.lexer.uri }/lexer"
     oidc_token {
       service_account_email = google_service_account.lexer_cloud_run.email
     }
