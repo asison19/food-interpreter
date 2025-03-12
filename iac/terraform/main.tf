@@ -6,7 +6,7 @@ data "google_project" "project" {
 
 # TODO look into automatically deleting images.
 resource "google_artifact_registry_repository" "food-interpreter-repository" {
-  location      = "us-central1"
+  location      = var.GCP_PROJECT_REGION
   repository_id = "food-interpreter-repository"
   description   = "Food Interpreter docker repository"
   format        = "DOCKER"
@@ -22,13 +22,13 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
 
 resource "google_cloud_run_v2_service" "lexer" {
   name     = "lexer-cloud-run"
-  location = "us-central1"
+  location = var.GCP_PROJECT_REGION
   deletion_protection = false
 
   template {
     timeout = "10s"
     containers {
-      image = "us-central1-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
+      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
       resources {
         limits = {
           memory = "1024Mi"
