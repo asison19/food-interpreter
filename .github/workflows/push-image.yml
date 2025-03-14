@@ -1,7 +1,7 @@
 # TODO look into requiring the other two workflows to pass.
 name: 'Push Docker Image'
 run-name: 'Push Docker Image'
-on:
+on: # TODO make this automatically push? Which would be by combining workflow(s)?
   workflow_run:
     workflows: [Run Lexer Tests] # TODO this will cause a race condition of the Infra deploy hasn't created the GAR repo yet.
     types:
@@ -41,6 +41,10 @@ jobs:
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
+        env: |
+          GCP_PROJECT_ID=vars.GCP_PROJECT_ID
+          GCP_PROJECT_REGION=vars.GCP_PROJECT_REGION
+
   echo-failure:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     environment: prod
