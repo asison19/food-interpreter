@@ -58,6 +58,13 @@ data "google_iam_policy" "lexer" {
       "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
     ]
   }
+
+  binding {
+    role = "roles/logging.logWriter"
+    members = [
+      "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
+    ]
+  }
 }
 
 resource "google_project_service_identity" "pubsub_agent" {

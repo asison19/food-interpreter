@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"food-interpreter/lexer"
 	"log"
 	"net/http"
 	"os"
+
+	"cloud.google.com/go/logging"
 )
 
 //type LexerPost struct {
@@ -34,7 +37,27 @@ func lexerHandler() http.Handler {
 	})
 }
 
+func setupLogging() {
+	ctx := context.Background()
+
+	projectID := os.Getenv("GCP_PROJECT_ID")
+
+	client, err := logging.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	logName := "lexer-log"
+
+	logger := client.Logger(logName).StandardLogger(logging.Info)
+
+	logger.Println("Logging Setup")
+}
+
 func main() {
+	setupLogging()
+
 	mux := http.NewServeMux()
 	lh := lexerHandler()
 
