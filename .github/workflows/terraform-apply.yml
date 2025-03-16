@@ -55,3 +55,4 @@ jobs:
         working-directory: ${{ github.workspace }}/iac/terraform
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
