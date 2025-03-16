@@ -53,7 +53,7 @@ resource "google_cloud_run_v2_service_iam_policy" "lexer" {
 
 data "google_iam_policy" "lexer" {
   binding {
-    role = "roles/run.builder" # TODO permissions aren't be created properly? Can't have multiple, https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service_iam#google_cloud_run_v2_service_iam_policy-1 ?
+    role = "roles/run.servicesInvoker" # TODO permissions aren't being created properly?
     members = [
       "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
     ]
