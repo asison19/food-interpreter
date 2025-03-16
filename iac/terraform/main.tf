@@ -60,7 +60,7 @@ data "google_iam_policy" "lexer" {
   }
 
   binding {
-    role = "roles/logging.logWriter"
+    role = "roles/run.builder"
     members = [
       "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
     ]
