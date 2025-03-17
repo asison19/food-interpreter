@@ -44,20 +44,17 @@ resource "google_service_account" "lexer_cloud_run" {
   display_name = "Lexer Cloud Run Service Account"
 }
 
-resource "google_cloud_run_v2_service_iam_policy" "lexer" {
-  project     = google_cloud_run_v2_service.lexer.project
-  location    = google_cloud_run_v2_service.lexer.location
-  name        = google_cloud_run_v2_service.lexer.name
-  policy_data = data.google_iam_policy.lexer.policy_data
+resource "google_cloud_run_service_iam_binding" "lexer_servicesinvoker" {
+  location = google_cloud_run_v2_service.lexer.location
+  service  = google_cloud_run_v2_service.lexer.name
+  role     = "roles/run.servicesInvoker"
+  members  = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
 }
 
-data "google_iam_policy" "lexer" {
-  binding {
-    role = "roles/run.servicesInvoker" # TODO permissions aren't being created properly?
-    members = [
-      "serviceAccount:${ google_service_account.lexer_cloud_run.email }",
-    ]
-  }
+resource "google_project_iam_binding" "lexer_logwriter" {
+  project = var.GCP_PROJECT_ID
+  role    = "roles/run.servicesInvoker"
+  members = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
