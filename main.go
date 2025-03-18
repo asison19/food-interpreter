@@ -53,7 +53,7 @@ func setupLogging() {
 
 	logger := client.Logger(logName).StandardLogger(logging.Info)
 
-	logger.Println("Logging Setup")
+	logger.Println("Lexer logging set up.")
 }
 
 func main() {

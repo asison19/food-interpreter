@@ -38,12 +38,12 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          build-args: |
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
+            GCP_PROJECT_REGION=${{ vars.GCP_PROJECT_REGION }}
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
-        env:
-          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-          GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
 
   echo-failure:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
