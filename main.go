@@ -15,7 +15,7 @@ import (
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func lexerHandler() http.Handler {
+func lexerHandler(logger *log.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var p struct {
 			Diary string `json:"diary"`
@@ -35,15 +35,14 @@ func lexerHandler() http.Handler {
 		}
 		w.Write(tokenBytes)
 		log.Printf(string(tokenBytes))
+		logger.Println("lexerHandler: " + string(tokenBytes))
 	})
 }
 
-func setupLogging() {
+func setupLogging() *log.Logger {
 	ctx := context.Background()
 
-	projectID := os.Getenv("GCP_PROJECT_ID")
-
-	client, err := logging.NewClient(ctx, projectID)
+	client, err := logging.NewClient(ctx, "food-interpreter")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -54,13 +53,14 @@ func setupLogging() {
 	logger := client.Logger(logName).StandardLogger(logging.Info)
 
 	logger.Println("Lexer logging set up.")
+	return logger
 }
 
 func main() {
-	setupLogging() // TODO don't run when not running on GCP.
+	logger := setupLogging() // TODO don't run when not running on GCP.
 
 	mux := http.NewServeMux()
-	lh := lexerHandler()
+	lh := lexerHandler(logger)
 
 	mux.Handle("/lexer", lh)
 
