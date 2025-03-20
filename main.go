@@ -17,6 +17,8 @@ import (
 
 func lexerHandler(logger *log.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Log Message received")
+		logger.Println("Logger message received")
 		var p struct {
 			Diary string `json:"diary"`
 		}
