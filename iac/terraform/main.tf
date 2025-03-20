@@ -53,7 +53,7 @@ resource "google_cloud_run_service_iam_binding" "lexer_servicesinvoker" {
 
 resource "google_project_iam_binding" "lexer_logwriter" {
   project = var.GCP_PROJECT_ID
-  role    = "roles/run.servicesInvoker"
+  role    = "roles/logging.logWriter"
   members = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
 }
 
