@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
+      - name: Get Short GitHub SHA
+        run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Setup Workload Identity Federation
         uses: google-github-actions/auth@v2
         with:
@@ -30,6 +32,7 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+          TF_VAR_SHA_SHORT: ${{ env.SHA_SHORT }}
   terraform-apply:
     needs: terraform-plan
     environment: prod
@@ -40,6 +43,8 @@ jobs:
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
+      - name: Get Short GitHub SHA
+        run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Setup Workload Identity Federation
         uses: google-github-actions/auth@v2
         with:
@@ -56,3 +61,4 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+          TF_VAR_SHA_SHORT: ${{ env.SHA_SHORT }}
