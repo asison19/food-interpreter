@@ -36,8 +36,6 @@ func lexerHandler(logger *log.Logger) http.Handler {
 			return
 		}
 		w.Write(tokenBytes)
-		log.Printf(string(tokenBytes))
-		logger.Println("lexerHandler: " + string(tokenBytes))
 	})
 }
 
@@ -59,7 +57,7 @@ func setupLogging() *log.Logger {
 }
 
 func main() {
-	logger := setupLogging() // TODO don't run when not running on GCP.
+	setupLogging()
 
 	mux := http.NewServeMux()
 	lh := lexerHandler(logger)
