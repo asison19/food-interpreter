@@ -28,6 +28,8 @@ resource "google_cloud_run_v2_service" "lexer" {
   template {
     timeout = "10s"
     containers {
+      # TODO pushing image pipeline has to go first if we're to do it this way.
+      # TODO is there a better way of doing this?
       image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:${ var.SHA_SHORT }"
       resources {
         limits = {

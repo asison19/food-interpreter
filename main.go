@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"cloud.google.com/go/logging"
 )
 
 //type LexerPost struct {
@@ -39,26 +37,7 @@ func lexerHandler(logger *log.Logger) http.Handler {
 	})
 }
 
-func setupLogging() *log.Logger {
-	ctx := context.Background()
-
-	client, err := logging.NewClient(ctx, "food-interpreter")
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-	defer client.Close()
-
-	logName := "lexer-log"
-
-	logger := client.Logger(logName).StandardLogger(logging.Info)
-
-	logger.Println("Lexer logging set up.")
-	return logger
-}
-
 func main() {
-	setupLogging()
-
 	mux := http.NewServeMux()
 	lh := lexerHandler(logger)
 
