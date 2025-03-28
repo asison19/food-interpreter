@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"food-interpreter/lexer"
 	"log"
@@ -13,10 +12,8 @@ import (
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func lexerHandler(logger *log.Logger) http.Handler {
+func lexerHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Log Message received")
-		logger.Println("Logger message received")
 		var p struct {
 			Diary string `json:"diary"`
 		}
@@ -39,7 +36,7 @@ func lexerHandler(logger *log.Logger) http.Handler {
 
 func main() {
 	mux := http.NewServeMux()
-	lh := lexerHandler(logger)
+	lh := lexerHandler()
 
 	mux.Handle("/lexer", lh)
 
