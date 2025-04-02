@@ -12,10 +12,10 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
   format        = "DOCKER"
 
   cleanup_policies {
-    id = "max-amount"
+    id = "delete-old"
     action = "DELETE"
     condition {
-      older_than   = "30d" 
+      older_than = "30d"
     }
   }
   cleanup_policies {
