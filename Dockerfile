@@ -7,5 +7,5 @@ ENV GCP_PROJECT_REGION ${GCP_PROJECT_REGION}
 RUN mkdir /app
 ADD . /app
 WORKDIR /app
-RUN go build -o main .
+RUN go build -o main ./cmd/gateway
 CMD ["/app/main"]
