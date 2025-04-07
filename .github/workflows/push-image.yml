@@ -1,3 +1,4 @@
+# TODO can this not auto trigger wait after lexer tests workflow, and have it be manually started instead?
 # TODO look into requiring the other two workflows to pass.
 name: 'Push Docker Image'
 run-name: 'Push Docker Image'
