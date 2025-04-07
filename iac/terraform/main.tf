@@ -15,7 +15,7 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
     id = "delete-old"
     action = "DELETE"
     condition {
-      older_than = "30d"
+      older_than = "2592000s" # 30 days
     }
   }
   cleanup_policies {
