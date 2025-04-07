@@ -114,8 +114,6 @@ resource "google_pubsub_subscription" "lexer" {
   depends_on = [ google_cloud_run_v2_service.lexer ]
 }
 
-# TODO way to view messages as it's not possible directly from topic
-#   - Create DLQ subscription and then "pull" from it?
 resource "google_pubsub_topic" "lexer-dlq" {
   name = "lexer-topic-dlq"
 
@@ -124,4 +122,14 @@ resource "google_pubsub_topic" "lexer-dlq" {
   }
 
   message_retention_duration = "604800s" # 7 days
+}
+
+resource "google_pubsub_subscription" "lexer-dlq" {
+  name                 = "lexer-subscription-dlq"
+  topic                = google_pubsub_topic.lexer.id
+  ack_deadline_seconds = 20
+
+  labels = {
+    service = "lexer"
+  }
 }
