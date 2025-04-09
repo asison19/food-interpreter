@@ -11,20 +11,20 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
   description   = "Food Interpreter docker repository"
   format        = "DOCKER"
 
-  cleanup_policies {
-    id = "delete-old"
-    action = "DELETE"
-    condition {
-      older_than = "30d"
-    }
-  }
-  cleanup_policies {
-    id     = "keep-amount"
-    action = "KEEP"
-    most_recent_versions {
-      keep_count = 5
-    }
-  }
+  #cleanup_policies {
+  #  id = "delete-old"
+  #  action = "DELETE"
+  #  condition {
+  #    older_than = "30d"
+  #  }
+  #}
+  #cleanup_policies {
+  #  id     = "keep-amount"
+  #  action = "KEEP"
+  #  most_recent_versions {
+  #    keep_count = 5
+  #  }
+  #}
 }
 
 resource "google_cloud_run_v2_service" "lexer" {
