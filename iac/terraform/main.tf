@@ -105,6 +105,7 @@ resource "google_pubsub_subscription" "lexer" {
     }
   }
 
+  # TODO Assign publisher role, Assign Subscriber role, Dead-letter topic should have a subscription
   dead_letter_policy {
     dead_letter_topic = google_pubsub_topic.lexer-dlq.id
     max_delivery_attempts = 5
