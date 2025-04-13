@@ -23,11 +23,11 @@ left to right direction
 
 [*] --> MonthAndDay : "mm/dd"
 
-MonthAndDay --> Time : "0000-2359"
+MonthAndDay --> Time : "0-2359"
 
-Time --> Food : "\S+\s*"
+Time --> Food : "\s*\w+(\s+\w+)*"
 Time --> Repeater : ".."
-Time --> Sleep : "sleep"
+Time --> Sleep : "(?i)\bsleep\b"
 
 Food --> Comma : ","
 Food --> Semicolon : ";"

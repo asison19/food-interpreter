@@ -1,0 +1,15 @@
+<year> := '\d+' <semicolon>
+
+<semicolon> := ';' <time>?
+
+<monthandday> := 'mm/dd' <time>
+
+<time> := '0-2359' (<food> | <repeater> | <sleep>)
+
+<food> := '\s*\w+(\s+\w+)*' (<comma> | <semicolon>)
+
+<comma> := ',' <food>
+
+<repeater> := '..' (<comma> | <semicolon>)
+
+<sleep> := '(?i)\bsleep\b' (<comma> | <semicolon>)
