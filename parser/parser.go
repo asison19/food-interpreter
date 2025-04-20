@@ -9,6 +9,7 @@ type Parser struct {
 	tokens  []lexer.Token
 	current lexer.Token
 	index   int
+	//errorCount int // TODO, only do up to 3-5 errors, probably best to go straight to semicolon, or the next line
 }
 
 // TODO newline seperation? Lexer needs to deal with it if so?
@@ -25,13 +26,22 @@ func ParseTokens(tokens []lexer.Token) Parser {
 
 func (p *Parser) parse() int {
 	for p.index < len(p.tokens) {
-		p.year() // TODO year isn't the only root
+		switch p.check().TokenType {
+		case lexer.YEAR:
+			p.year() // TODO year isn't the only root. p.check() it?
+		case lexer.MONTHANDDAY:
+			p.monthAndDay() // TODO year isn't the only root. p.check() it?
+		default:
+			fmt.Printf("Year or MonthAndDay expected, got %v instead", p.check())
+			p.nextToken() // We're allowing a continue
+		}
 		fmt.Println()
 	}
 	return 0
 }
 
 // Go to the next token
+// TODO gracefully handling if it's the last token
 func (p *Parser) nextToken() bool {
 	// TODO check for last
 	p.index++
@@ -42,7 +52,7 @@ func (p *Parser) nextToken() bool {
 	return false
 }
 
-// Consume the next token if it's acceptable
+// Accept the current token if it's the same as the passed in token.
 func (p *Parser) accept(tokenType int) bool {
 	if p.current.TokenType == tokenType {
 		fmt.Printf("%v accepted", p.current.TokenType) // TODO print the token type in string not int
@@ -52,12 +62,13 @@ func (p *Parser) accept(tokenType int) bool {
 	return false
 }
 
-// Check the next token is as expected
+// The passed in token is the expected current (unconsumed) token
+// if not, that's a syntax error.
 func (p *Parser) expect(tokenType int) bool {
 	if p.accept(tokenType) {
 		return true
 	}
-	print("Error: unexpected symbol")
+	fmt.Printf("Error: unexpected symbol %v", p.check())
 	return false
 }
 
@@ -74,24 +85,74 @@ func (p *Parser) check() lexer.Token {
 	return p.tokens[p.index]
 }
 
+// TODO index out of range for 01/23 last in token slice
+func (p *Parser) monthAndDay() {
+	fmt.Println("monthAndDay")
+	p.expect(lexer.MONTHANDDAY)
+	p.time()
+}
+
+func (p *Parser) time() {
+	p.expect(lexer.TIME)
+
+	// TODO is this the best way of going about this?
+	switch p.check().TokenType {
+	case lexer.FOOD:
+		p.food()
+	case lexer.REPEATER:
+		p.repeater()
+	case lexer.SLEEP:
+		p.sleep()
+	default:
+		fmt.Printf("Food, repeater, or sleep expected, got %v instead", p.check())
+		p.nextToken()
+	}
+
+}
+func (p *Parser) food() {
+	p.expect(lexer.FOOD)
+	switch p.check().TokenType {
+	case lexer.COMMA: // TODO rename comma nonterminal
+		p.comma()
+	case lexer.SEMICOLON: // TODO turn semicolon to a terminal?
+		p.semicolon()
+	default:
+		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		p.nextToken()
+	}
+}
+func (p *Parser) repeater() {
+	p.expect(lexer.REPEATER)
+	switch p.check().TokenType {
+	case lexer.COMMA:
+		p.comma()
+	case lexer.SEMICOLON:
+		p.semicolon()
+	default:
+		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		p.nextToken()
+	}
+}
+func (p *Parser) sleep() {
+	p.expect(lexer.SLEEP)
+	switch p.check().TokenType {
+	case lexer.COMMA:
+		p.comma()
+	case lexer.SEMICOLON:
+		p.semicolon()
+	default:
+		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		p.nextToken()
+	}
+}
+
+// TODO Update the language. After a comma could be a repeater, or sleep.
+func (p *Parser) comma() {
+	p.expect(lexer.COMMA)
+	p.food()
+}
+
 //
 func (p *Parser) semicolon() {
 	p.accept(lexer.SEMICOLON)
 }
-
-//
-//type Yr interface {
-//}
-
-// TODO tree nodes should be structs?
-type Year struct {
-	Year      lexer.Token
-	Semicolon lexer.Token
-}
-
-type Semicolon struct {
-	Semicolon lexer.Token
-}
-
-//type MonthAndDay struct {
-//}
