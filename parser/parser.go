@@ -18,8 +18,7 @@ type Parser struct {
 func ParseTokens(tokens []lexer.Token) Parser {
 	parser := Parser{tokens, tokens[0], 0}
 
-	e := parser.parse()
-	fmt.Print(e)
+	parser.parse()
 
 	return parser // TODO what exactly should be returned?
 }
@@ -87,7 +86,6 @@ func (p *Parser) check() lexer.Token {
 
 // TODO index out of range for 01/23 last in token slice
 func (p *Parser) monthAndDay() {
-	fmt.Println("monthAndDay")
 	p.expect(lexer.MONTHANDDAY)
 	p.time()
 }
