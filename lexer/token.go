@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
+type TokenType int
+
 const (
-	YEAR = iota
+	YEAR TokenType = iota
 	SEMICOLON
 	MONTHANDDAY
 	TIME
@@ -19,11 +21,15 @@ const (
 )
 
 type Token struct {
-	TokenType int
+	Type TokenType
 	//lexeme    string
 	Lexeme string
 }
 
+func (t TokenType) String() string {
+	return [...]string{"YEAR", "SEMICOLON", "MONTHANDDAY", "TIME", "FOOD", "REPEATER", "COMMA", "SLEEP"}[t-1]
+}
+
 func (t *Token) String() string {
-	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.TokenType, t.Lexeme)
+	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.Type, t.Lexeme)
 }

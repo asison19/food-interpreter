@@ -76,14 +76,14 @@ L:
 			continue L
 		case ";": // SEMICOLON
 			lexer.addToken(Token{
-				TokenType: SEMICOLON,
-				Lexeme:    lexer.lexeme,
+				Type:   SEMICOLON,
+				Lexeme: lexer.lexeme,
 			})
 			continue L
 		case ",": // COMMA
 			lexer.addToken(Token{
-				TokenType: COMMA,
-				Lexeme:    lexer.lexeme,
+				Type:   COMMA,
+				Lexeme: lexer.lexeme,
 			})
 			continue L
 		// TODO
@@ -145,8 +145,8 @@ func (l *Lexer) reapeater() Token {
 	if ahead == "." {
 		l.advance()
 		return Token{
-			TokenType: REPEATER,
-			Lexeme:    l.lexeme,
+			Type:   REPEATER,
+			Lexeme: l.lexeme,
 		}
 	}
 	l.reportError(fmt.Sprintf("Unexpected character %s when lexing token REPEATER, lexeme: ", l.lexeme))
@@ -161,8 +161,8 @@ func (l *Lexer) year() Token {
 		ahead = l.lookahead(1)
 	}
 	return Token{
-		TokenType: YEAR,
-		Lexeme:    l.lexeme,
+		Type:   YEAR,
+		Lexeme: l.lexeme,
 	}
 }
 
@@ -180,14 +180,14 @@ func (l *Lexer) identifier() Token {
 	// FOOD
 	if !ok {
 		return Token{
-			TokenType: FOOD,
-			Lexeme:    l.lexeme,
+			Type:   FOOD,
+			Lexeme: l.lexeme,
 		}
 	}
 
 	return Token{
-		TokenType: tokenType,
-		Lexeme:    l.lexeme,
+		Type:   tokenType,
+		Lexeme: l.lexeme,
 	}
 }
 
@@ -241,7 +241,7 @@ func (l *Lexer) number() Token {
 		}
 
 		return Token{
-			TokenType: MONTHANDDAY,
+			Type: MONTHANDDAY,
 			//lexeme:
 			Lexeme: l.lexeme,
 		}
@@ -265,7 +265,7 @@ func (l *Lexer) number() Token {
 	}
 
 	return Token{
-		TokenType: TIME,
+		Type: TIME,
 		//lexeme:
 		Lexeme: l.lexeme,
 	}

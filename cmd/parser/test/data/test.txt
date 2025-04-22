@@ -1,6 +1,2 @@
-y9001
-y0 123
-y4;
-01/23 abc
-01/23 1234
-
+01/23 1234 apple, banana, cucumber; 
+01/23 1234 apple, , cucumber; 

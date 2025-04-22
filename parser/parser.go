@@ -25,7 +25,7 @@ func ParseTokens(tokens []lexer.Token) Parser {
 
 func (p *Parser) parse() int {
 	for p.index < len(p.tokens) {
-		switch p.check().TokenType {
+		switch p.check().Type {
 		case lexer.YEAR:
 			p.year() // TODO year isn't the only root. p.check() it?
 		case lexer.MONTHANDDAY:
@@ -52,9 +52,9 @@ func (p *Parser) nextToken() bool {
 }
 
 // Accept the current token if it's the same as the passed in token.
-func (p *Parser) accept(tokenType int) bool {
-	if p.current.TokenType == tokenType {
-		fmt.Printf("%v accepted", p.current.TokenType) // TODO print the token type in string not int
+func (p *Parser) accept(tokenType lexer.TokenType) bool {
+	if p.current.Type == tokenType {
+		fmt.Printf("%v accepted", p.current.Type) // TODO print the token type in string not int
 		p.nextToken()
 		return true
 	}
@@ -63,7 +63,7 @@ func (p *Parser) accept(tokenType int) bool {
 
 // The passed in token is the expected current (unconsumed) token
 // if not, that's a syntax error.
-func (p *Parser) expect(tokenType int) bool {
+func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	if p.accept(tokenType) {
 		return true
 	}
@@ -94,7 +94,7 @@ func (p *Parser) time() {
 	p.expect(lexer.TIME)
 
 	// TODO is this the best way of going about this?
-	switch p.check().TokenType {
+	switch p.check().Type {
 	case lexer.FOOD:
 		p.food()
 	case lexer.REPEATER:
@@ -109,7 +109,7 @@ func (p *Parser) time() {
 }
 func (p *Parser) food() {
 	p.expect(lexer.FOOD)
-	switch p.check().TokenType {
+	switch p.check().Type {
 	case lexer.COMMA: // TODO rename comma nonterminal
 		p.comma()
 	case lexer.SEMICOLON: // TODO turn semicolon to a terminal?
@@ -121,7 +121,7 @@ func (p *Parser) food() {
 }
 func (p *Parser) repeater() {
 	p.expect(lexer.REPEATER)
-	switch p.check().TokenType {
+	switch p.check().Type {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
@@ -133,7 +133,7 @@ func (p *Parser) repeater() {
 }
 func (p *Parser) sleep() {
 	p.expect(lexer.SLEEP)
-	switch p.check().TokenType {
+	switch p.check().Type {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
