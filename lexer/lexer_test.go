@@ -1,4 +1,3 @@
-// TODO move this to test dir?
 package lexer
 
 import (

@@ -27,7 +27,7 @@ type Token struct {
 }
 
 func (t TokenType) String() string {
-	return [...]string{"YEAR", "SEMICOLON", "MONTHANDDAY", "TIME", "FOOD", "REPEATER", "COMMA", "SLEEP"}[t-1]
+	return [...]string{"YEAR", "SEMICOLON", "MONTHANDDAY", "TIME", "FOOD", "REPEATER", "COMMA", "SLEEP"}[t]
 }
 
 func (t *Token) String() string {

@@ -27,9 +27,9 @@ func (p *Parser) parse() int {
 	for p.index < len(p.tokens) {
 		switch p.check().Type {
 		case lexer.YEAR:
-			p.year() // TODO year isn't the only root. p.check() it?
+			p.year()
 		case lexer.MONTHANDDAY:
-			p.monthAndDay() // TODO year isn't the only root. p.check() it?
+			p.monthAndDay()
 		default:
 			fmt.Printf("Year or MonthAndDay expected, got %v instead", p.check())
 			p.nextToken() // We're allowing a continue
@@ -40,9 +40,7 @@ func (p *Parser) parse() int {
 }
 
 // Go to the next token
-// TODO gracefully handling if it's the last token
 func (p *Parser) nextToken() bool {
-	// TODO check for last
 	p.index++
 	if p.index < len(p.tokens) {
 		p.current = p.tokens[p.index]
@@ -54,7 +52,7 @@ func (p *Parser) nextToken() bool {
 // Accept the current token if it's the same as the passed in token.
 func (p *Parser) accept(tokenType lexer.TokenType) bool {
 	if p.current.Type == tokenType {
-		fmt.Printf("%v accepted", p.current.Type) // TODO print the token type in string not int
+		fmt.Printf("%v accepted", p.current.Type)
 		p.nextToken()
 		return true
 	}
@@ -150,7 +148,8 @@ func (p *Parser) comma() {
 	p.food()
 }
 
-//
+// TODO do I really need this to be a nonterminal?
+// TODO make it so that it's optional for the end of a line for MonthAndDay root or at least just Year.
 func (p *Parser) semicolon() {
 	p.accept(lexer.SEMICOLON)
 }
