@@ -1,19 +1,39 @@
-# TODO can this not auto trigger wait after lexer tests workflow, and have it be manually started instead?
-# TODO look into requiring the other two workflows to pass.
-name: 'Push Docker Image'
-run-name: 'Push Docker Image'
-on: # TODO make this automatically push? Which would be by combining workflow(s)?
-  workflow_run:
-    workflows: [Run Lexer Tests] # TODO this will cause a race condition of the Infra deploy hasn't created the GAR repo yet.
-    types:
-      - completed
+name: 'Run Lexer Tests'
+run-name: 'Run Lexer Tests'
+on: [push]
 jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup Go
+        uses: actions/setup-go@v5.1.0
+        with:
+          go-version: '1.23.0'
+          cache-dependency-path: "**/*.sum" # TODO, new error, "Restore cache failed: Some specified paths were not resolved, unable to cache dependencies."
+          cache: true
+      - name: Run Lexer tests
+        run: cd lexer && go test -v
+  generate-release:
+    needs: [run-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.8.1
+      - name: Generate release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
   push-docker-image:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: prod
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Setup Github Actions checkout
@@ -47,10 +67,3 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
       - name: Update Cloud Run Service to latest image
         run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
-
-  echo-failure:
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    environment: prod
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "The Lexer Tests failed. Pushing docker image to GAR cancelled."
