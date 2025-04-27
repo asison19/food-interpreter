@@ -33,8 +33,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release
-          echo "Resolved version: $VERSION"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          env
+          echo "Resolved version: $RELEASE_VERSION"
+          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
   push-docker-image: # TODO empty check if no release?
     needs: [run-tests, generate-release]
     environment: prod
