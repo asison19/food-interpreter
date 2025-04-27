@@ -20,17 +20,23 @@ jobs:
     permissions:
       contents: write
       packages: write
+    outputs:
+      version: ${{ steps.release.outputs.version }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v4
         with:
           node-version: 20.8.1
       - name: Generate release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          npx semantic-release
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
   push-docker-image:
-    needs: [run-tests]
+    needs: [run-tests, generate-release]
+    #environment: prod # TODO ensure other environments won't mess with each other.
     permissions:
       contents: read
       id-token: write
@@ -65,5 +71,6 @@ jobs:
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Service to latest image
         run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
