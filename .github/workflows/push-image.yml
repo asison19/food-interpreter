@@ -34,8 +34,8 @@ jobs:
         run: |
           npx semantic-release
           echo "Resolved version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-  push-docker-image:
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+  push-docker-image: # TODO empty check if no release?
     needs: [run-tests, generate-release]
     environment: prod
     permissions:
