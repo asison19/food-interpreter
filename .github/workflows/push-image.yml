@@ -27,15 +27,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20.8.1
+      - name: Dry run to get the next release version
+        id: tag_version
+        run: |
+          export VERSION=$(npx semantic-release --dry-run | grep 'The next release version is' | sed -E 's/.* ([[:digit:].]+)$/\1/')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
       - name: Generate release
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npx semantic-release
-          env
-          echo "Resolved version: $RELEASE_VERSION"
-          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+        run: npx semantic-release
   push-docker-image: # TODO empty check if no release?
     needs: [run-tests, generate-release]
     environment: prod
