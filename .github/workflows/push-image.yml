@@ -36,7 +36,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
   push-docker-image:
     needs: [run-tests, generate-release]
-    #environment: prod # TODO ensure other environments won't mess with each other.
+    environment: prod
     permissions:
       contents: read
       id-token: write
