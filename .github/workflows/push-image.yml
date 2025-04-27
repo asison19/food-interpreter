@@ -31,7 +31,6 @@ jobs:
         run: npx semantic-release
   push-docker-image:
     needs: [run-tests]
-    environment: prod
     permissions:
       contents: read
       id-token: write
