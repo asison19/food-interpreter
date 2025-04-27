@@ -30,6 +30,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
   push-docker-image:
+    needs: [run-tests]
     environment: prod
     permissions:
       contents: read
