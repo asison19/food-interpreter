@@ -31,6 +31,7 @@ resource "kubernetes_deployment" "food-interpreter" {
         container {
           # TODO variableize this
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
+          # TODO is there a way to change the deployment without going through terraform if the image in the GAR gets updated?
           image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ var.FOOD_INTERPRETER_IMAGE_VERSION }"
           name  = "food-interpreter-container"
           port {
