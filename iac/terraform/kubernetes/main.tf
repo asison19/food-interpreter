@@ -88,7 +88,7 @@ resource "kubernetes_service" "food-interpreter" {
 
 # Provide time for Service cleanup
 resource "time_sleep" "wait_service_cleanup" {
-  depends_on = [google_container_cluster.default]
+  depends_on = [ google_container_cluster.primary ]
 
   destroy_duration = "180s"
 }
