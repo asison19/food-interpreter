@@ -9,7 +9,7 @@ resource "google_service_account" "default" {
 
 resource "google_container_cluster" "primary" {
   name     = "primary-gke-cluster"
-  location = "us-central1-a" # TODO variableize
+  location = var.GCP_PROJECT_REGION
 
   #remove_default_node_pool = true
   initial_node_count       = 1
@@ -23,7 +23,7 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_node_pool" "primary" {
   name       = "primary-node-pool"
-  location   = "us-central1-a"
+  location   = var.GCP_PROJECT_REGION
   cluster    = google_container_cluster.primary.name
   node_count = 1
 
