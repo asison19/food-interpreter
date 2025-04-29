@@ -81,6 +81,7 @@ jobs:
         run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
   # TODO set it such that it's more obvious that the original terraform-apply.yml or these two jobs here can run one or the other or both technically.
   terraform-plan:
+    needs: push-docker-image
     environment: prod
     permissions:
       contents: 'read'
