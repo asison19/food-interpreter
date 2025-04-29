@@ -1,5 +1,5 @@
-name: 'Run Lexer Tests'
-run-name: 'Run Lexer Tests'
+name: 'Food Interpreter Workflow'
+run-name: 'Food Interpreter Workflow'
 on: [push]
 jobs:
   run-tests:

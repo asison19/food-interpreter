@@ -8,11 +8,6 @@ data "google_project" "project" {
 
 data "google_client_config" "default" {}
 
-data "google_container_cluster" "primary" {
-  name     = "primary-gke-cluster" # TODO variableize and use from kubernetes-cluster project.
-  location = "us-central1-a" # TODO same as above.
-}
-
 resource "kubernetes_deployment" "food-interpreter" {
   metadata {
     name = "food-interpreter"
