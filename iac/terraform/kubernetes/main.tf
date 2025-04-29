@@ -8,6 +8,7 @@ data "google_project" "project" {
 
 data "google_client_config" "default" {}
 
+# TODO naming, hyphen, move the resource.
 resource "kubernetes_deployment" "food-interpreter" {
   metadata {
     name = "food-interpreter"
@@ -55,6 +56,7 @@ resource "kubernetes_deployment" "food-interpreter" {
   }
 }
 
+# TODO naming, hyphen, move the resource.
 resource "kubernetes_service" "food-interpreter" {
   metadata {
     name = "food-interpreter-loadbalancer"

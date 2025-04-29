@@ -19,5 +19,5 @@ variable "SHA_SHORT" {
 variable "food_interpreter_image_version" {
     type = string
     default = ""
-    description = "value"
+    description = "Version of the food interpreter docker image"
 }
