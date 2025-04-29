@@ -16,7 +16,7 @@ variable "SHA_SHORT" {
     description = "Git SHA shortened used to use the latest image for Cloud Run."
 }
 
-variable "food_interpreter_image_version" {
+variable "FOOD_INTERPRETER_IMAGE_VERSION" {
     type = string
     default = ""
     description = "Version of the food interpreter docker image"

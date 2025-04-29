@@ -102,12 +102,14 @@ jobs:
         with:
           working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Plan
-        run: terraform plan
+        run:
+          terraform plan
+          echo "version:" ${{ needs.generate-release.outputs.version }}
         working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_food_interpreter_image_version: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
   terraform-apply:
     needs: terraform-plan
     environment: prod
@@ -129,9 +131,11 @@ jobs:
         with:
           working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve
+          echo "version:" ${{ needs.generate-release.outputs.version }}
         working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_food_interpreter_image_version: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
