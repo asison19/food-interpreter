@@ -1,3 +1,4 @@
+# TODO set it such that it's more obvious that the original terraform-apply.yml or the two kubernetes jobs in push-image.yml can run one or the other or both technically.
 # TODO turn this into a reusable action/module
 name: 'Infrastructure Deploy'
 run-name: 'Infrastructure Deploy'
