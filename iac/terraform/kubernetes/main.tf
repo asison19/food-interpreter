@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "food-interpreter" {
           name  = "food-interpreter-container"
           port {
             container_port = 8080
-            name           = "food-interpreter-svc"
+            name           = "food-int"
           }
           #security_context {
           #  allow_privilege_escalation = false
