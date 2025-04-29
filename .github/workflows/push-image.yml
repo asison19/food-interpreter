@@ -102,7 +102,7 @@ jobs:
         with:
           working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Plan
-        run:
+        run: |
           terraform plan
           echo "version:" ${{ needs.generate-release.outputs.version }}
         working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
