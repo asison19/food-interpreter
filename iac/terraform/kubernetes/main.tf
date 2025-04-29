@@ -71,8 +71,6 @@ resource "kubernetes_service" "food-interpreter" {
       app = kubernetes_deployment.food-interpreter.spec[0].selector[0].match_labels.app
     }
 
-    ip_family_policy = "RequireDualStack"
-
     port {
       port        = 80
       target_port = kubernetes_deployment.food-interpreter.spec[0].template[0].spec[0].container[0].port[0].name
