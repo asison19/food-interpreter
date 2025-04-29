@@ -72,6 +72,7 @@ jobs:
           build-args: |
             GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
             GCP_PROJECT_REGION=${{ vars.GCP_PROJECT_REGION }}
+          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
@@ -104,7 +105,7 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_version: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_food_interpreter_image_version: ${{ needs.generate-release.outputs.version }}
   terraform-apply:
     needs: terraform-plan
     environment: prod
@@ -131,4 +132,4 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_VERSION: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_food_interpreter_image_version: ${{ needs.generate-release.outputs.version }}

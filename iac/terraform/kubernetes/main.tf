@@ -34,7 +34,8 @@ resource "kubernetes_deployment" "food-interpreter" {
       spec {
         container {
           # TODO variableize this
-          image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ vars.version }"
+          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
+          image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ vars.food_interpreter_image_version }"
           name  = "food-interpreter-container"
           port {
             container_port = 8080
