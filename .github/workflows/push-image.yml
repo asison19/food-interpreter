@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20.8.1
-      - name: Dry run to get the next release version
+      - name: Get release version
         id: get-version
         run: |
           export VERSION=$(npx semantic-release --dry-run | grep 'The next release version is' | sed -E 's/.* ([[:digit:].]+)$/\1/')
@@ -78,3 +78,57 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Service to latest image
         run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
+  # TODO set it such that it's more obvious that the original terraform-apply.yml or these two jobs here can run one or the other or both technically.
+  terraform-plan:
+    environment: prod
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Github Actions checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          create_credentials_file: true
+          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+      - name: Terraform action
+        uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
+        with:
+          working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+      - name: Run Terraform Plan
+        run: terraform plan
+        working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+        env:
+          TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+          TF_VAR_version: ${{ needs.generate-release.outputs.version }}
+  terraform-apply:
+    needs: terraform-plan
+    environment: prod
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Github Actions checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          create_credentials_file: true
+          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+      - name: Terraform action
+        uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
+        with:
+          working-directory: ${{ github.workspace }}/iac/terraform
+      - name: Run Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ${{ github.workspace }}/iac/terraform
+        env:
+          TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+          TF_VAR_VERSION: ${{ needs.generate-release.outputs.version }}
