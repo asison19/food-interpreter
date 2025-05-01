@@ -29,28 +29,14 @@ resource "kubernetes_deployment" "food-interpreter" {
       }
       spec {
         container {
-          # TODO variableize this
-          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
+          # TODO this will have the latest at the time. How to ensure it has the latest all the time? Try similar way as cloud run?
           # TODO is there a way to change the deployment without going through terraform if the image in the GAR gets updated?
-          image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ var.FOOD_INTERPRETER_IMAGE_VERSION }"
+          image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
           name  = "food-interpreter-container"
           port {
             container_port = 8080
             name           = "food-int"
           }
-          #security_context {
-          #  allow_privilege_escalation = false
-          #  privileged                 = false
-          #  read_only_root_filesystem  = false
-
-          #  capabilities {
-          #    add  = []
-          #    drop = ["NET_RAW"]
-          #  }
-          #}
-          #liveness_probe {
-          #  # TODO
-          #}
         }
       }
     }
@@ -62,7 +48,7 @@ resource "kubernetes_service" "food-interpreter" {
   metadata {
     name = "food-interpreter-loadbalancer"
     annotations = {
-      "networking.gke.io/load-balancer-type" = "Internal" # Remove to create an external loadbalancer
+      "networking.gke.io/load-balancer-type" = "Internal"
     }
   }
 
@@ -88,19 +74,3 @@ resource "time_sleep" "wait_service_cleanup" {
 
   destroy_duration = "180s"
 }
-
-#output "endpoint" {
-#  value = data.google_container_cluster.my_cluster.endpoint
-#}
-#
-#output "instance_group_urls" {
-#  value = data.google_container_cluster.my_cluster.node_pool[0].instance_group_urls
-#}
-#
-#output "node_config" {
-#  value = data.google_container_cluster.my_cluster.node_config
-#}
-#
-#output "node_pools" {
-#  value = data.google_container_cluster.my_cluster.node_pool
-#}
