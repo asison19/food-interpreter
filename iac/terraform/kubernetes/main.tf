@@ -29,9 +29,9 @@ resource "kubernetes_deployment" "food-interpreter" {
       }
       spec {
         container {
-          # TODO this will have the latest at the time. How to ensure it has the latest all the time? Try similar way as cloud run? What about rollbacks?
+          # TODO this will have the latest at the time. How to ensure it has the latest all the time? Try similar way as cloud run? What about rollbacks? ArgoCD?
           # TODO is there a way to change the deployment without going through terraform if the image in the GAR gets updated?
-          image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
+          image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ var.FOOD_INTERPRETER_IMAGE_VERSION }"
           name  = "food-interpreter-container"
           port {
             container_port = 8080
