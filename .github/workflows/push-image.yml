@@ -160,9 +160,9 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/kubernetes
+          working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Destroy
         run: terraform destroy -auto-approve
-        working-directory: ${{ github.workspace }}/kubernetes
+        working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
