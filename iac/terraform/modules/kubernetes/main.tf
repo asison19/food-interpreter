@@ -1,15 +1,39 @@
-#
-# Creating the Kubernetes workload
-#
-
 data "google_project" "project" {
   project_id = var.GCP_PROJECT_ID
 }
 
 data "google_client_config" "default" {}
 
-# TODO naming, hyphen, move the resource.
-resource "kubernetes_deployment" "food-interpreter" {
+#
+# Creating the Kubernetes cluster
+#
+
+# TODO what was I doing with this?
+resource "google_service_account" "default" {
+  account_id   = "gke-service-account"
+  display_name = "Service Account"
+}
+
+# TODO rename and move these resources? Can't move, immutable name
+resource "google_container_cluster" "primary" {
+  name     = "food-interpreter-cluster"
+  location = var.GCP_PROJECT_REGION
+
+  #remove_default_node_pool = true
+  initial_node_count       = 1
+  enable_autopilot         = true # TODO keep autopilot?
+
+  deletion_protection = false
+
+  #network    = google_compute_network.default.id
+  #subnetwork = google_compute_subnetwork.default.id
+}
+
+#
+# Creating the Kubernetes workload
+#
+
+resource "kubernetes_deployment" "food_interpreter" {
   metadata {
     name = "food-interpreter"
   }
@@ -31,7 +55,7 @@ resource "kubernetes_deployment" "food-interpreter" {
         container {
           # TODO this will have the latest at the time. How to ensure it has the latest all the time? Try similar way as cloud run? What about rollbacks? ArgoCD?
           # TODO is there a way to change the deployment without going through terraform if the image in the GAR gets updated?
-          image = "us-central1-docker.pkg.dev/food-interpreter/food-interpreter-repository/food-interpreter:${ var.FOOD_INTERPRETER_IMAGE_VERSION }"
+          image = var.deployment_image
           name  = "food-interpreter-container"
           port {
             container_port = 8080
@@ -43,8 +67,7 @@ resource "kubernetes_deployment" "food-interpreter" {
   }
 }
 
-# TODO naming, hyphen, move the resource.
-resource "kubernetes_service" "food-interpreter" {
+resource "kubernetes_service" "food_interpreter" {
   metadata {
     name = "food-interpreter-loadbalancer"
     annotations = {

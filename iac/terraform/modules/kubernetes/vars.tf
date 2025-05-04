@@ -21,3 +21,10 @@ variable "FOOD_INTERPRETER_IMAGE_VERSION" {
     default = ""
     description = "Version of the food interpreter docker image"
 }
+
+# TODO create deployment another way since this is Terraform?
+variable "deployment_image" {
+    type = string
+    default = ""
+    description = "Image of the deployment to create."
+}

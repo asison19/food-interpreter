@@ -82,7 +82,6 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Service to latest image
         run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
-  # TODO set it such that it's more obvious that the original terraform-apply.yml or these two jobs here can run one or the other or both technically.
   terraform-plan:
     needs: [push-docker-image, run-tests, generate-release]
     environment: prod
@@ -102,16 +101,17 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+          working-directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Plan
         run: |
           terraform plan
           echo "version:" ${{ needs.generate-release.outputs.version }}
-        working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+        working-directory: ${{ github.workspace }}/iac/terraform
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }} # TODO ArgoCD deployments for kubernetes?
+          TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-apply:
     needs: [push-docker-image, run-tests, generate-release, terraform-plan]
     environment: prod
@@ -131,16 +131,17 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+          working-directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Apply
         run: |
           terraform apply -auto-approve
           echo "version:" ${{ needs.generate-release.outputs.version }}
-        working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+        working-directory: ${{ github.workspace }}/iac/terraform
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-destroy:
     needs: terraform-apply
     environment: prod
@@ -160,11 +161,12 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+          working-directory: ${{ github.workspace }}/iac/terraform
       - name: Run Terraform Destroy
         run: terraform destroy -auto-approve
-        working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
+        working-directory: ${{ github.workspace }}/iac/terraform
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
+          TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}

@@ -15,3 +15,9 @@ variable "SHA_SHORT" {
     default = ""
     description = "Git SHA shortened used to use the latest image for Cloud Run."
 }
+
+variable "ENABLE_KUBERNETES" {
+    type = string
+    default = "false"
+    description = "If enabled, GKE is used."
+}
