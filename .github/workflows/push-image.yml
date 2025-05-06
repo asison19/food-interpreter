@@ -14,7 +14,7 @@ jobs:
           cache: true
       - name: Run Lexer tests
         run: cd lexer && go test -v
-  generate-release:
+  generate-release: # TODO chore() doesn't count as release
     needs: run-tests
     runs-on: ubuntu-latest
     permissions:
@@ -100,7 +100,7 @@ jobs:
           TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-destroy:
-    needs: terraform-apply
+    needs: [generate-release, terraform-apply]
     environment: prod
     permissions:
       contents: 'read'
