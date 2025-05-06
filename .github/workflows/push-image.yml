@@ -15,7 +15,7 @@ jobs:
       - name: Run Lexer tests
         run: cd lexer && go test -v
   generate-release:
-    needs: [run-tests]
+    needs: run-tests
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -39,51 +39,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-  # TODO empty check if no release?
-  # TODO don't push (or generate) a new image if it never changed.
-  push-docker-image:
-    needs: [run-tests, generate-release]
-    environment: prod
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Github Actions checkout
-        uses: actions/checkout@v4.2.2
-      - name: Setup Workload Identity Federation
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          token_format: access_token
-          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-      - name: Get Short GitHub SHA
-        run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build Docker Image
-        run: 'docker build -t food-interpreter .'
-      - name: Login to GAR
-        uses: docker/login-action@v3
-        with:
-          registry: us-central1-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
-      - name: Push Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          build-args: |
-            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
-            GCP_PROJECT_REGION=${{ vars.GCP_PROJECT_REGION }}
-          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
-          tags: |
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
-      - name: Update Cloud Run Service to latest image
-        run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
   terraform-plan:
-    needs: [push-docker-image, run-tests, generate-release]
+    needs: generate-release # TODO remove generate-release once a better way of versioning is done
     environment: prod
     permissions:
       contents: 'read'
@@ -113,7 +70,7 @@ jobs:
           TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }} # TODO ArgoCD deployments for kubernetes?
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-apply:
-    needs: [push-docker-image, run-tests, generate-release, terraform-plan]
+    needs: [generate-release, terraform-plan]
     environment: prod
     permissions:
       contents: 'read'
@@ -170,3 +127,45 @@ jobs:
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
+  # TODO don't push (or generate) a new image if it never changed.
+  push-docker-image:
+    needs: [run-tests, generate-release]
+    environment: prod
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Github Actions checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+      - name: Get Short GitHub SHA
+        run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Build Docker Image
+        run: 'docker build -t food-interpreter .'
+      - name: Login to GAR
+        uses: docker/login-action@v3
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+      - name: Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          build-args: |
+            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
+            GCP_PROJECT_REGION=${{ vars.GCP_PROJECT_REGION }}
+          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
+          tags: |
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
+      - name: Update Cloud Run Service to latest image
+        run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
