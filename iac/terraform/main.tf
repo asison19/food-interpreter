@@ -1,5 +1,5 @@
 module "kubernetes" {
-  source = "modules/kubernetes"
+  source = "./modules/kubernetes"
 
   count = lower(var.ENABLE_KUBERNETES) == "true" ? 1 : 0
 
