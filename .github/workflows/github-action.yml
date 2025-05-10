@@ -58,12 +58,12 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform
+          working-directory: ${{ github.workspace }}/iac/terraform/main
       - name: Run Terraform Plan
         run: |
           terraform plan
           echo "version:" ${{ needs.generate-release.outputs.version }}
-        working-directory: ${{ github.workspace }}/iac/terraform
+        working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
@@ -88,12 +88,12 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform
+          working-directory: ${{ github.workspace }}/iac/terraform/main
       - name: Run Terraform Apply
         run: |
           terraform apply -auto-approve
           echo "version:" ${{ needs.generate-release.outputs.version }}
-        working-directory: ${{ github.workspace }}/iac/terraform
+        working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
@@ -118,10 +118,10 @@ jobs:
       - name: Terraform action
         uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
         with:
-          working-directory: ${{ github.workspace }}/iac/terraform
+          working-directory: ${{ github.workspace }}/iac/terraform/main
       - name: Run Terraform Destroy
         run: terraform destroy -auto-approve
-        working-directory: ${{ github.workspace }}/iac/terraform
+        working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}

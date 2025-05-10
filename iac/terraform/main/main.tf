@@ -1,21 +1,3 @@
-# TODO this is a bad idea since the provider for kubernetes needs the gke cluster info initially.
-#module "kubernetes" {
-#  source = "./modules/kubernetes"
-#
-#  count = lower(var.ENABLE_KUBERNETES) == "true" ? 1 : 0
-#
-#  GCP_PROJECT_ID                 = var.GCP_PROJECT_ID
-#  GCP_PROJECT_REGION             = var.GCP_PROJECT_REGION
-#  SHA_SHORT                      = var.SHA_SHORT
-#  FOOD_INTERPRETER_IMAGE_VERSION = var.FOOD_INTERPRETER_IMAGE_VERSION
-#
-#  deployment_image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
-#}
-
-data "google_project" "project" {
-  project_id = var.GCP_PROJECT_ID
-}
-
 resource "google_artifact_registry_repository" "food-interpreter-repository" {
   location      = var.GCP_PROJECT_REGION
   repository_id = "food-interpreter-repository"
