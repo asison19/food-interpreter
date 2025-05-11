@@ -1,3 +1,7 @@
+data "google_project" "project" {
+  project_id = var.GCP_PROJECT_ID
+}
+
 resource "google_artifact_registry_repository" "food-interpreter-repository" {
   location      = var.GCP_PROJECT_REGION
   repository_id = "food-interpreter-repository"
