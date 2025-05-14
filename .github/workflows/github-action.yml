@@ -130,8 +130,7 @@ jobs:
         with:
           push: true
           build-args: |
-            GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
-            GCP_PROJECT_REGION=${{ vars.GCP_PROJECT_REGION }}
+            IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
