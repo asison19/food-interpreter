@@ -67,7 +67,7 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }} # TODO ArgoCD deployments for kubernetes?
+          #TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }} # TODO ArgoCD deployments for kubernetes?
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-apply:
     needs: [generate-release, terraform-plan]
@@ -97,7 +97,6 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   terraform-destroy:
     needs: [generate-release, terraform-apply]
@@ -125,7 +124,6 @@ jobs:
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   # TODO don't push (or generate) a new image if it never changed.
   push-docker-image:
