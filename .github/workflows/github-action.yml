@@ -1,5 +1,4 @@
 name: 'Food Interpreter Workflow'
-run-name: 'Food Interpreter Workflow'
 on: [push]
 jobs:
   run-tests:
@@ -93,33 +92,6 @@ jobs:
         run: |
           terraform apply -auto-approve
           echo "version:" ${{ needs.generate-release.outputs.version }}
-        working-directory: ${{ github.workspace }}/iac/terraform/main
-        env:
-          TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-          TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
-          TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
-  terraform-destroy:
-    needs: [generate-release, terraform-apply]
-    environment: prod
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Github Actions checkout
-        uses: actions/checkout@v4.2.2
-      - name: Setup Workload Identity Federation
-        uses: google-github-actions/auth@v2
-        with:
-          create_credentials_file: true
-          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-      - name: Terraform action
-        uses: asison19/github-actions/composite-actions/terraform-action@v1.3.1
-        with:
-          working-directory: ${{ github.workspace }}/iac/terraform/main
-      - name: Run Terraform Destroy
-        run: terraform destroy -auto-approve
         working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}

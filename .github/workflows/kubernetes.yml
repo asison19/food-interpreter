@@ -1,5 +1,4 @@
 name: 'Deploy GKE kubernetes cluster'
-run-name: 'Deploy GKE kubernetes cluster'
 on: [workflow_dispatch]
 jobs:
   terraform-plan:
