@@ -97,7 +97,7 @@ jobs:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
-  # TODO don't push (or generate) a new image if it never changed.
+  # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
   push-docker-image:
     needs: [run-tests, generate-release]
     environment: prod
