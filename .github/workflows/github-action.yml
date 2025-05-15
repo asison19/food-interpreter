@@ -35,9 +35,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate release
+        run: npx semantic-release@19
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
   terraform-plan:
     needs: generate-release # TODO remove generate-release once a better way of versioning is done
     environment: prod

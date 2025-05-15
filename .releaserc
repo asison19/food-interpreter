@@ -1,4 +1,6 @@
 {
+  "branches": ["master", "semantic-release-branching"],
+  "tagFormat": "<% version == \"master\" ? version : version-branchName %>",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
