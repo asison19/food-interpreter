@@ -9,6 +9,9 @@
       {
         "run": [
           {
+            "cmd": "npm install -g @semantic-release/exec"
+          },
+          {
             "cmd": "git rev-parse --abbrev-ref HEAD",
             "message": "branchName"
           }
