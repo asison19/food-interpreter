@@ -34,12 +34,11 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install exec for semantic-release
-        run: npm install -g @semantic-release/exec
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate release
-        run: npx semantic-release@19
+        run: |
+          npm install semantic-release@19
+          npm install @semantic-release/exec
+          npx semantic-release@19
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   terraform-plan:
