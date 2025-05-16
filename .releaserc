@@ -4,6 +4,17 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "run": [
+          {
+            "cmd": "git rev-parse --abbrev-ref HEAD",
+            "message": "branchName"
+          }
+        ]
+      }
+    ],
     "@semantic-release/github"
   ]
 }
