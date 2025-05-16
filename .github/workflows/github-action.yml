@@ -36,7 +36,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate release
         run: |
-          npm install semantic-release@19
           npm install @semantic-release/exec
           npx semantic-release@19
         env:
