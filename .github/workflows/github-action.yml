@@ -37,7 +37,7 @@ jobs:
       - name: Generate release
         run: |
           npm install @semantic-release/exec
-          npx semantic-release@19
+          npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   terraform-plan:
