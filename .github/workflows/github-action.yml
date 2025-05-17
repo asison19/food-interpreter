@@ -13,7 +13,9 @@ jobs:
           cache: true
       - name: Run Lexer tests
         run: cd lexer && go test -v
-  generate-release: # TODO chore() doesn't count as release
+  # To release on other branches
+  #  "branches": ["master", "<branch-name>"]
+  generate-release:
     needs: run-tests
     runs-on: ubuntu-latest
     permissions:
@@ -98,6 +100,7 @@ jobs:
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
+  # TODO generate images for other branches
   push-docker-image:
     needs: [run-tests, generate-release]
     environment: prod
