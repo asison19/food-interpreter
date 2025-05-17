@@ -1,0 +1,10 @@
+name: food-interpreter
+services:
+  gateway:
+    build:
+      context: ./docker/gateway
+      dockerfile: Dockerfile
+  interpreter:
+    build:
+      context: ./docker/interpreter
+      dockerfile: Dockerfile

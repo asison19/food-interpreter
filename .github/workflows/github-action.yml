@@ -120,8 +120,8 @@ jobs:
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
       - name: Get Short GitHub SHA
         run: echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build Docker Image
-        run: 'docker build -t food-interpreter .'
+      - name: Build Docker Images
+        run: 'docker compose build'
       - name: Login to GAR
         uses: docker/login-action@v3
         with:
@@ -136,8 +136,8 @@ jobs:
             IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ env.SHA_SHORT }}
-            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:${{ needs.generate-release.outputs.version }}
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/interpreter:latest
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/interpreter:${{ env.SHA_SHORT }}
+            us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/interpreter:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Service to latest image
-        run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
+        run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}

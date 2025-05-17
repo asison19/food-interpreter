@@ -35,6 +35,10 @@ func lexerHandler() http.Handler {
 }
 
 func main() {
+
+	image_version := os.Getenv("IMAGE_VERSION")
+	log.Printf("Running IMAGE_VERSION: %s", image_version)
+
 	mux := http.NewServeMux()
 	lh := lexerHandler()
 

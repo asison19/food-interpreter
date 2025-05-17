@@ -5,5 +5,5 @@ ENV IMAGE_VERSION ${IMAGE_VERSION}
 RUN mkdir /app
 ADD . /app
 WORKDIR /app
-RUN go build -o main ./cmd/gateway
+RUN go build -o main ./cmd/interpreter
 CMD ["/app/main"]
