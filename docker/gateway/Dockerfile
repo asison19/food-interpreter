@@ -9,5 +9,6 @@ ENV TOPIC_ID ${TOPIC_ID}
 RUN mkdir /app
 ADD . /app
 WORKDIR /app
+RUN go get cloud.google.com/go/pubsub
 RUN go build -o main ./cmd/gateway
 CMD ["/app/main"]
