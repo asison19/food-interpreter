@@ -13,7 +13,7 @@ Comments:
 ## Usage
 To run this project locally, install your choice of containerization tool such as Docker Desktop on your machine and run the following commands,
 ```
-docker build -t food-interpreter .
+docker compose build
 docker run -it -p 8080:8080 food-interpreter
 ```
 You can now run it by hitting the endpoint like this,
