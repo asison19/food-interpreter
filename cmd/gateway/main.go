@@ -1,18 +1,21 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"food-interpreter/lexer"
 	"log"
 	"net/http"
 	"os"
+
+	"cloud.google.com/go/pubsub"
 )
 
 //type LexerPost struct {
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func lexerHandler() http.Handler {
+func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var p struct {
 			Diary string `json:"diary"`
@@ -23,14 +26,40 @@ func lexerHandler() http.Handler {
 			return
 		}
 
-		l := lexer.LexString(p.Diary)
-
-		tokenBytes, err2 := json.Marshal(l.Tokens)
-		if err2 != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		// Create a client
+		ctx := context.Background()
+		gcp_project_id := os.Getenv("GCP_PROJECT_ID")
+		client, err := pubsub.NewClient(ctx, gcp_project_id)
+		if err != nil {
+			log.Printf("Error using GCP Project ID: %s; Error: %s", gcp_project_id, err)
 			return
 		}
-		w.Write(tokenBytes)
+
+		// Define the topic
+		topic_id := os.Getenv("TOPIC_ID")
+		topic := client.Topic(topic_id)
+
+		// Publish a message
+		result := topic.Publish(ctx, &pubsub.Message{
+		    Data: []byte(p.Diary),
+		})
+
+		// Get the message ID
+		id, err := result.Get(ctx)
+		if err != nil {
+			log.Printf("Error getting message ID: %s; %s", id, err)
+			return
+		}
+		fmt.Printf("Published message ID %s\n", id)
+
+		//l := lexer.LexString(p.Diary)
+
+		//tokenBytes, err2 := json.Marshal(l.Tokens)
+		//if err2 != nil {
+		//	http.Error(w, err.Error(), http.StatusBadRequest)
+		//	return
+		//}
+		//w.Write(tokenBytes)
 	})
 }
 
@@ -40,9 +69,9 @@ func main() {
 	log.Printf("Running IMAGE_VERSION: %s", image_version)
 
 	mux := http.NewServeMux()
-	lh := lexerHandler()
+	ih := interpretHandler()
 
-	mux.Handle("/lexer", lh)
+	mux.Handle("/interpret", ih)
 
 	port := os.Getenv("PORT")
 	if port == "" {
