@@ -24,8 +24,8 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
   }
 }
 
-resource "google_cloud_run_v2_service" "lexer" {
-  name     = "lexer-cloud-run"
+resource "google_cloud_run_v2_service" "interpreter" {
+  name     = "interpreter-cloud-run"
   location = var.GCP_PROJECT_REGION
   deletion_protection = false
 
@@ -43,22 +43,22 @@ resource "google_cloud_run_v2_service" "lexer" {
   }
 }
 
-resource "google_service_account" "lexer_cloud_run" {
-  account_id   = "lexer-cloud-run"
-  display_name = "Lexer Cloud Run Service Account"
+resource "google_service_account" "interpreter_cloud_run" {
+  account_id   = "interpreter-cloud-run"
+  display_name = "Interpreter Cloud Run Service Account"
 }
 
-resource "google_cloud_run_service_iam_binding" "lexer_servicesinvoker" {
-  location = google_cloud_run_v2_service.lexer.location
-  service  = google_cloud_run_v2_service.lexer.name
+resource "google_cloud_run_service_iam_binding" "interpreter_servicesinvoker" {
+  location = google_cloud_run_v2_service.interpreter.location
+  service  = google_cloud_run_v2_service.interpreter.name
   role     = "roles/run.servicesInvoker"
-  members  = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
+  members  = ["serviceAccount:${ google_service_account.interpreter_cloud_run.email }"]
 }
 
-resource "google_project_iam_binding" "lexer_logwriter" {
+resource "google_project_iam_binding" "interpreter_logwriter" {
   project = var.GCP_PROJECT_ID
   role    = "roles/logging.logWriter"
-  members = ["serviceAccount:${ google_service_account.lexer_cloud_run.email }"]
+  members = ["serviceAccount:${ google_service_account.interpreter_cloud_run.email }"]
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
@@ -74,29 +74,29 @@ resource "google_project_iam_binding" "project_token_creator" {
 }
 
 # TODO schema?
-resource "google_pubsub_topic" "lexer" {
-  name = "lexer-topic"
+resource "google_pubsub_topic" "interpreter" {
+  name = "interpreter-topic"
 
   labels = {
-    service = "lexer"
+    service = "interpreter"
   }
 
   message_retention_duration = "86000s"
 }
 
-resource "google_pubsub_subscription" "lexer" {
-  name                 = "lexer-subscription"
-  topic                = google_pubsub_topic.lexer.id
+resource "google_pubsub_subscription" "interpreter" {
+  name                 = "interpreter-subscription"
+  topic                = google_pubsub_topic.interpreter.id
   ack_deadline_seconds = 20
 
   labels = {
-    service = "lexer"
+    service = "interpreter"
   }
 
   push_config {
-    push_endpoint = "${ google_cloud_run_v2_service.lexer.uri }/lexer"
+    push_endpoint = "${ google_cloud_run_v2_service.interpreter.uri }/interpreter"
     oidc_token {
-      service_account_email = google_service_account.lexer_cloud_run.email
+      service_account_email = google_service_account.interpreter_cloud_run.email
     }
     attributes = {
       x-goog-version = "v1"
@@ -104,29 +104,29 @@ resource "google_pubsub_subscription" "lexer" {
   }
 
   dead_letter_policy {
-    dead_letter_topic = google_pubsub_topic.lexer-dlq.id
+    dead_letter_topic = google_pubsub_topic.interpreter-dlq.id
     max_delivery_attempts = 5
   }
 
-  depends_on = [ google_cloud_run_v2_service.lexer ]
+  depends_on = [ google_cloud_run_v2_service.interpreter ]
 }
 
-resource "google_pubsub_topic" "lexer-dlq" {
-  name = "lexer-topic-dlq"
+resource "google_pubsub_topic" "interpreter-dlq" {
+  name = "interpreter-topic-dlq"
 
   labels = {
-    service = "lexer"
+    service = "interpreter"
   }
 
   message_retention_duration = "604800s" # 7 days
 }
 
-resource "google_pubsub_subscription" "lexer-dlq" {
-  name                 = "lexer-subscription-dlq"
-  topic                = google_pubsub_topic.lexer.id
+resource "google_pubsub_subscription" "interpreter-dlq" {
+  name                 = "interpreter-subscription-dlq"
+  topic                = google_pubsub_topic.interpreter.id
   ack_deadline_seconds = 20
 
   labels = {
-    service = "lexer"
+    service = "interpreter"
   }
 }
