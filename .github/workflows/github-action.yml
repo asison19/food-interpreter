@@ -128,9 +128,11 @@ jobs:
           registry: us-central1-docker.pkg.dev
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
-      - name: Push Docker Image
+      - name: Push Interpreter Docker Image
         uses: docker/build-push-action@v2
         with:
+          context: .
+          file: docker/interpreter/Dockerfile
           push: true
           build-args: |
             IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
@@ -139,6 +141,16 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:${{ env.SHA_SHORT }}
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:${{ needs.generate-release.outputs.version }}
+      - name: Push Gateway Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: docker/gateway/Dockerfile
+          push: true
+          build-args: |
+            IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
+          # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
+          tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ env.SHA_SHORT }}
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ needs.generate-release.outputs.version }}
