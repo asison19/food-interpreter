@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"food-interpreter/lexer"
 	"log"
 	"net/http"
 	"os"
@@ -50,7 +49,7 @@ func interpretHandler() http.Handler {
 			log.Printf("Error getting message ID: %s; %s", id, err)
 			return
 		}
-		fmt.Printf("Published message ID %s\n", id)
+		io.WriteString(w, "Published message ID " + id + ".\n")
 
 		//l := lexer.LexString(p.Diary)
 
