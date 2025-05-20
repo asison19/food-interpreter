@@ -1,3 +1,4 @@
+# TODO 2025/05/20 21:32:34 Error getting message ID: ; rpc error: code = InvalidArgument desc = Invalid resource name given (name=projects/food-interpreter/topics/). Refer to https://cloud.google.com/pubsub/docs/pubsub-basics#resource_names for more information.
 resource "google_cloud_run_v2_service" "gateway" {
   name     = "gateway-cloud-run"
   location = var.GCP_PROJECT_REGION

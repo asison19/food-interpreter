@@ -112,7 +112,8 @@ resource "google_pubsub_subscription" "interpreter" {
   depends_on = [ google_cloud_run_v2_service.interpreter ]
 }
 
-# TODO test dlq works as intended
+# TODO 404 messages aren't going to DLQ. Check Dead Lettering issues on console.
+# TODO 404s after renaming everything when placing message straight to pubsub topic
 resource "google_pubsub_topic" "interpreter-dlq" {
   name = "interpreter-topic-dlq"
 
