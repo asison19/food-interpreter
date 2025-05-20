@@ -24,6 +24,7 @@ resource "google_artifact_registry_repository" "food-interpreter-repository" {
   }
 }
 
+# TODO move this out, same as gateway
 resource "google_cloud_run_v2_service" "interpreter" {
   name     = "interpreter-cloud-run"
   location = var.GCP_PROJECT_REGION
@@ -32,7 +33,7 @@ resource "google_cloud_run_v2_service" "interpreter" {
   template {
     timeout = "10s"
     containers {
-      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter:latest"
+      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter-interpreter:latest"
       resources {
         limits = {
           memory = "1024Mi"
@@ -111,6 +112,7 @@ resource "google_pubsub_subscription" "interpreter" {
   depends_on = [ google_cloud_run_v2_service.interpreter ]
 }
 
+# TODO test dlq works as intended
 resource "google_pubsub_topic" "interpreter-dlq" {
   name = "interpreter-topic-dlq"
 
