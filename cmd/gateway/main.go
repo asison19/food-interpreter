@@ -41,16 +41,17 @@ func interpretHandler() http.Handler {
 
 		// Publish a message
 		result := topic.Publish(ctx, &pubsub.Message{
-		    Data: []byte(p.Diary),
+			Data: []byte(p.Diary),
 		})
 
+		// TODO 2025/05/20 21:32:34 Error getting message ID: ; rpc error: code = InvalidArgument desc = Invalid resource name given (name=projects/food-interpreter/topics/). Refer to https://cloud.google.com/pubsub/docs/pubsub-basics#resource_names for more information.
 		// Get the message ID
 		id, err := result.Get(ctx)
 		if err != nil {
 			log.Printf("Error getting message ID: %s; %s", id, err)
 			return
 		}
-		io.WriteString(w, "Published message ID " + id + ".\n")
+		io.WriteString(w, "Published message ID "+id+".\n")
 
 		//l := lexer.LexString(p.Diary)
 
