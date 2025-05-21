@@ -95,7 +95,7 @@ resource "google_pubsub_subscription" "interpreter" {
   }
 
   push_config {
-    push_endpoint = "${ google_cloud_run_v2_service.interpreter.uri }/interpreter"
+    push_endpoint = "${ google_cloud_run_v2_service.interpreter.uri }/interpret"
     oidc_token {
       service_account_email = google_service_account.interpreter_cloud_run.email
     }

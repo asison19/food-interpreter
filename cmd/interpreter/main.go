@@ -12,7 +12,7 @@ import (
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func lexerHandler() http.Handler {
+func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var p struct {
 			Diary string `json:"diary"`
@@ -40,9 +40,9 @@ func main() {
 	log.Printf("Running IMAGE_VERSION: %s", image_version)
 
 	mux := http.NewServeMux()
-	lh := lexerHandler()
+	ih := interpretHandler()
 
-	mux.Handle("/lexer", lh)
+	mux.Handle("/interpret", ih)
 
 	port := os.Getenv("PORT")
 	if port == "" {
