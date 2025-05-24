@@ -86,9 +86,10 @@ resource "google_pubsub_topic" "interpreter" {
 }
 
 resource "google_pubsub_subscription" "interpreter" {
-  name                 = "interpreter-subscription"
-  topic                = google_pubsub_topic.interpreter.id
-  ack_deadline_seconds = 20
+  name                  = "interpreter-subscription"
+  topic                 = google_pubsub_topic.interpreter.id
+  ack_deadline_seconds  = 20
+  retain_acked_messages = false
 
   labels = {
     service = "interpreter"
@@ -126,7 +127,7 @@ resource "google_pubsub_topic" "interpreter-dlq" {
 
 resource "google_pubsub_subscription" "interpreter-dlq" {
   name                 = "interpreter-subscription-dlq"
-  topic                = google_pubsub_topic.interpreter.id
+  topic                = google_pubsub_topic.interpreter-dlq.id
   ack_deadline_seconds = 20
 
   labels = {
