@@ -134,3 +134,15 @@ resource "google_pubsub_subscription" "interpreter-dlq" {
     service = "interpreter"
   }
 }
+
+resource "google_project_iam_member" "subscriber_role" {
+  role    = "roles/pubsub.subscriber"
+  member  = "serviceAccount:service-${var.GCP_PROJECT_ID}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  project = var.GCP_PROJECT_ID
+}
+
+resource "google_project_iam_member" "editor_role" {
+  role    = "roles/pubsub.editor"
+  member  = "serviceAccount:service-${var.GCP_PROJECT_ID}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  project = var.GCP_PROJECT_ID
+}
