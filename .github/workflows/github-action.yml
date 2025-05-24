@@ -164,5 +164,7 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ env.SHA_SHORT }}
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ needs.generate-release.outputs.version }}
-      - name: Update Cloud Run Service to latest image
-        run: gcloud run services update ${{ vars.GCP_CLOUD_RUN_SERVICE_NAME }} --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
+      - name: Update Cloud Run Services to their latest images
+        run: |
+          gcloud run services update "interpreter-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
+          gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
