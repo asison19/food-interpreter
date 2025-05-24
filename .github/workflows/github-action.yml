@@ -67,6 +67,7 @@ jobs:
         working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_GCP_PROJECT_NUMBER: ${{ vars.GCP_PROJECT_NUMBER }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           #TF_VAR_FOOD_INTERPRETER_IMAGE_VERSION: ${{ needs.generate-release.outputs.version }} # TODO ArgoCD deployments for kubernetes?
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
@@ -97,6 +98,7 @@ jobs:
         working-directory: ${{ github.workspace }}/iac/terraform/main
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_GCP_PROJECT_NUMBER: ${{ vars.GCP_PROJECT_NUMBER }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
       - name: Get Terraform Output

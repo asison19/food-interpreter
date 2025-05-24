@@ -4,6 +4,12 @@ variable "GCP_PROJECT_ID" {
     description = "GCP Project ID of where to create the infrastructure."
 }
 
+variable "GCP_PROJECT_NUMBER" {
+    type = string
+    default = ""
+    description = "GCP Project Number of where to create the infrastructure."
+}
+
 variable "GCP_PROJECT_REGION" {
     type = string
     default = ""
