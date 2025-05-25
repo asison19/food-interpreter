@@ -107,7 +107,7 @@ jobs:
         #   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#id-1
         run: |
           echo "$(terraform output --json)" | jq -r 'keys[] as $k | "$$$k)=$$.[$k].value)"' >> $GITHUB_OUTPUT
-          echo $GITHUB_OUTPUT
+      - run: echo "${{ steps.env-setup.outputs.interpreter_pubsub_topic_id }}"
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
   # TODO generate images for other branches
   # TODO should be able to push without needing to run terraform apply everytime. Once GAR and topic (for interpreter) are created, we only need the name/id.

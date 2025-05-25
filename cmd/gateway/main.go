@@ -29,6 +29,7 @@ func interpretHandler() http.Handler {
 		// Create a client
 		ctx := context.Background()
 		gcp_project_id := os.Getenv("GCP_PROJECT_ID")
+		log.Printf("The GCP_PROJECT_ID is: %s", gcp_project_id)
 		client, err := pubsub.NewClient(ctx, gcp_project_id)
 		if err != nil {
 			log.Printf("Error using GCP Project ID: %s; Error: %s", gcp_project_id, err)
@@ -37,7 +38,7 @@ func interpretHandler() http.Handler {
 
 		// Define the topic
 		topic_id := os.Getenv("TOPIC_ID")
-		log.Printf("The TOPIC_ID is: %s",topic_id)
+		log.Printf("The TOPIC_ID is: %s", topic_id)
 		topic := client.Topic(topic_id)
 
 		// Publish a message
