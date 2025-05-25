@@ -37,6 +37,7 @@ func interpretHandler() http.Handler {
 
 		// Define the topic
 		topic_id := os.Getenv("TOPIC_ID")
+		log.Printf("The TOPIC_ID is: %s",topic_id)
 		topic := client.Topic(topic_id)
 
 		// Publish a message

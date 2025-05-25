@@ -105,7 +105,9 @@ jobs:
         # TODO this might be off, cutting the ID out Look into:
         #   https://developer.hashicorp.com/terraform/cli/commands/output
         #   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#id-1
-        run: echo "$(terraform output --json)" | jq -r 'keys[] as $k | "$$$k)=$$.[$k].value)"' >> $GITHUB_OUTPUT
+        run: |
+          echo "$(terraform output --json)" | jq -r 'keys[] as $k | "$$$k)=$$.[$k].value)"' >> $GITHUB_OUTPUT
+          echo $GITHUB_OUTPUT
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
   # TODO generate images for other branches
   # TODO should be able to push without needing to run terraform apply everytime. Once GAR and topic (for interpreter) are created, we only need the name/id.
@@ -117,6 +119,12 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
+      - name: Output variables
+        run: |
+          echo "the topic id is: $TOPIC_ID"
+          echo "the tf output for the topic id is: ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}"
+        env:
+         TOPIC_ID: ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
       - name: Setup Workload Identity Federation
@@ -166,5 +174,6 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Services to their latest images
         run: |
+          echo ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}
           gcloud run services update "interpreter-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
