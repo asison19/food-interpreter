@@ -78,6 +78,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
+    outputs:
+      interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
@@ -102,9 +104,7 @@ jobs:
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
           TF_VAR_ENABLE_KUBERNETES: ${{ vars.ENABLE_KUBERNETES }}
       - name: Get Terraform Output
-        # TODO this might be off, cutting the ID out Look into:
-        #   https://developer.hashicorp.com/terraform/cli/commands/output
-        #   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#id-1
+        id: terraform-output
         working-directory: ${{ github.workspace }}/iac/terraform/main
         run: echo "$(terraform output --json)" | jq -r 'keys[] as $k | "$$$k)=$$.[$k].value)"' >> $GITHUB_OUTPUT
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
