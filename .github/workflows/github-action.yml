@@ -106,10 +106,11 @@ jobs:
         #   https://developer.hashicorp.com/terraform/cli/commands/output
         #   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#id-1
         working-directory: ${{ github.workspace }}/iac/terraform/main
+        id: terraform-output
         run: |
           echo "$(terraform output --json)"
           echo "$(terraform output --json)" | jq -r 'keys[] as $k | "\($k)=\(.[$k].value)"' >> $GITHUB_OUTPUT
-      - run: echo "${{ steps.env-setup.outputs.interpreter_pubsub_topic_id }}"
+      - run: echo "${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}"
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
   # TODO generate images for other branches
   # TODO should be able to push without needing to run terraform apply everytime. Once GAR and topic (for interpreter) are created, we only need the name/id.
@@ -124,9 +125,9 @@ jobs:
       - name: Output variables
         run: |
           echo "the topic id is: $TOPIC_ID"
-          echo "the tf output for the topic id is: ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}"
+          echo "the tf output for the topic id is: ${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}"
         env:
-         TOPIC_ID: ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}
+         TOPIC_ID: ${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
       - name: Setup Workload Identity Federation
@@ -168,7 +169,7 @@ jobs:
           build-args: |
             IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
             GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
-            TOPIC_ID=${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}
+            TOPIC_ID=${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest
@@ -176,6 +177,6 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:${{ needs.generate-release.outputs.version }}
       - name: Update Cloud Run Services to their latest images
         run: |
-          echo ${{ needs.generate-release.outputs.interpreter_pubsub_topic_id }}
+          echo ${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}
           gcloud run services update "interpreter-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
