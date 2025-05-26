@@ -105,6 +105,7 @@ jobs:
         # TODO this might be off, cutting the ID out Look into:
         #   https://developer.hashicorp.com/terraform/cli/commands/output
         #   https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic#id-1
+        working-directory: ${{ github.workspace }}/iac/terraform/main
         run: |
           echo "$(terraform output --json)"
           echo "$(terraform output --json)" | jq -r 'keys[] as $k | "\($k)=\(.[$k].value)"' >> $GITHUB_OUTPUT
