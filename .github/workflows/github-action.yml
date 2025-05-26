@@ -110,6 +110,7 @@ jobs:
         run: |
           echo "$(terraform output --json)"
           echo "$(terraform output --json)" | jq -r 'keys[] as $k | "\($k)=\(.[$k].value)"' >> $GITHUB_OUTPUT
+          echo "$(terraform output --json)" | jq -r 'keys[] as $k | "\($k)=\(.[$k].value)"'
       - run: echo "${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}"
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
   # TODO generate images for other branches
