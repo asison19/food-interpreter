@@ -37,7 +37,8 @@ func interpretHandler() http.Handler {
 
 		// Define the topic
 		topic_id := os.Getenv("TOPIC_ID")
-		topic := client.Topic(topic_id)
+		topic_id_split := strings.Split(topic_id, "/")
+		topic := client.Topic(topic_id_split[len(topic_id_split)-1])
 
 		// Publish a message
 		result := topic.Publish(ctx, &pubsub.Message{
