@@ -78,6 +78,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
+    outputs:
+      interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
