@@ -135,12 +135,14 @@ resource "google_pubsub_subscription" "interpreter-dlq" {
   }
 }
 
+# Add to the Cloud Pub/Sub service account for this project the publisher role to publish dead-lettered messages to the dead-letter topic.
 resource "google_project_iam_member" "subscriber_role" {
   role    = "roles/pubsub.subscriber"
   member  = "serviceAccount:service-${var.GCP_PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
   project = var.GCP_PROJECT_ID
 }
 
+# Add to the Cloud Pub/Sub service account for this project the subscriber role to forward messages from Pub/Sub subscriptions to dead-letter topics.
 resource "google_project_iam_member" "editor_role" {
   role    = "roles/pubsub.editor"
   member  = "serviceAccount:service-${var.GCP_PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"

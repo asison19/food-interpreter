@@ -16,7 +16,7 @@ import (
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func interpretHandler() http.Handler {
+func enqueueDiaryHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var p struct {
 			Diary string `json:"diary"`
@@ -46,7 +46,6 @@ func interpretHandler() http.Handler {
 			Data: []byte(p.Diary),
 		})
 
-		// TODO 2025/05/20 21:32:34 Error getting message ID: ; rpc error: code = InvalidArgument desc = Invalid resource name given (name=projects/food-interpreter/topics/). Refer to https://cloud.google.com/pubsub/docs/pubsub-basics#resource_names for more information.
 		// Get the message ID
 		id, err := result.Get(ctx)
 		if err != nil {
@@ -54,15 +53,6 @@ func interpretHandler() http.Handler {
 			return
 		}
 		io.WriteString(w, "Published message ID "+id+".\n")
-
-		//l := lexer.LexString(p.Diary)
-
-		//tokenBytes, err2 := json.Marshal(l.Tokens)
-		//if err2 != nil {
-		//	http.Error(w, err.Error(), http.StatusBadRequest)
-		//	return
-		//}
-		//w.Write(tokenBytes)
 	})
 }
 
@@ -72,9 +62,9 @@ func main() {
 	log.Printf("Running IMAGE_VERSION: %s", image_version)
 
 	mux := http.NewServeMux()
-	ih := interpretHandler()
+	edh := enqueueDiaryHandler()
 
-	mux.Handle("/interpret", ih)
+	mux.Handle("/enqueue-diary", edh)
 
 	port := os.Getenv("PORT")
 	if port == "" {

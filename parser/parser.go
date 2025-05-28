@@ -20,7 +20,7 @@ func ParseTokens(tokens []lexer.Token) Parser {
 
 	parser.parse()
 
-	return parser // TODO what exactly should be returned?
+	return parser // TODO what exactly should be returned? Create AST nodes and return them on each function, then return the root (need to make a complete root?) here?
 }
 
 func (p *Parser) parse() int {
