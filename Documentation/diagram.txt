@@ -5,7 +5,7 @@
 
 left to right direction
 
-[*] --> Year : "\d+"
+[*] --> Year : "y\d+"
 
 Year --> Semicolon : ";"
 Year --> EOL

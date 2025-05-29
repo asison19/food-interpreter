@@ -1,4 +1,4 @@
-<year> := '\d+' <semicolon>
+<year> := 'y\d+' <semicolon>
 
 <semicolon> := ';' <time>?
 
