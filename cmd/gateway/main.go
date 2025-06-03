@@ -10,11 +10,54 @@ import (
 	"strings"
 
 	"cloud.google.com/go/pubsub"
+
+	"crypto/tls"
+	"crypto/x509"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
+
+	"google.golang.org/api/idtoken"
+	"google.golang.org/grpc"
+	grpcMetadata "google.golang.org/grpc/metadata"
 )
 
 //type LexerPost struct {
 //	Diary string `json:"diary,string,omitempty"`
 //}
+
+func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
+	var opts []grpc.DialOption
+	if host != "" {
+		opts = append(opts, grpc.WithAuthority(host))
+	}
+
+	if insecure {
+		opts = append(opts, grpc.WithInsecure())
+	} else {
+		// Note: On the Windows platform, use of x509.SystemCertPool() requires
+		// Go version 1.18 or higher.
+		systemRoots, err := x509.SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			RootCAs: systemRoots,
+		})
+		opts = append(opts, grpc.WithTransportCredentials(cred))
+	}
+
+	return grpc.Dial(host, opts...)
+}
+
+func pingRequest(conn *grpc.ClientConn, p *pb.Request) (*pb.Response, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	client := pb.NewPingServiceClient(conn)
+	return client.Send(ctx, p)
+}
 
 func enqueueDiaryHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
