@@ -6,6 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"crypto/tls"
+	"crypto/x509"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 //type LexerPost struct {
@@ -34,15 +40,33 @@ func interpretHandler() http.Handler {
 	})
 }
 
+// r type should be the diary?
+func Interpret(r *http.Request) {
+	var p struct {
+		Diary string `json:"diary"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	l := lexer.LexString(p.Diary)
+
+	tokenBytes, err2 := json.Marshal(l.Tokens)
+	if err2 != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	return tokenBytes
+}
+
 func main() {
 
 	image_version := os.Getenv("IMAGE_VERSION")
 	log.Printf("Running IMAGE_VERSION: %s", image_version)
 
-	mux := http.NewServeMux()
-	ih := interpretHandler()
-
-	mux.Handle("/interpret", ih)
+	log.Printf("grpc-ping: starting server...")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -50,8 +74,14 @@ func main() {
 		log.Printf("Defaulting to port %s", port)
 	}
 
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatalf("net.Listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterPingServiceServer(grpcServer, &pingService{})
+	if err = grpcServer.Serve(listener); err != nil {
 		log.Fatal(err)
 	}
 }
