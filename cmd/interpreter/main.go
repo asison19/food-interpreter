@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"food-interpreter/lexer"
+	"food-interpreter/interpreter"
 	"log"
 	"net/http"
 	"os"
@@ -29,36 +29,15 @@ func interpretHandler() http.Handler {
 			return
 		}
 
-		l := lexer.LexString(p.Diary)
+		p := interpreter.Interpret(p.Diary)
 
-		tokenBytes, err2 := json.Marshal(l.Tokens)
+		tokenBytes, err2 := json.Marshal(p.Tokens)
 		if err2 != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.Write(tokenBytes)
 	})
-}
-
-// r type should be the diary?
-func Interpret(r *http.Request) {
-	var p struct {
-		Diary string `json:"diary"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&p)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	l := lexer.LexString(p.Diary)
-
-	tokenBytes, err2 := json.Marshal(l.Tokens)
-	if err2 != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	return tokenBytes
 }
 
 func main() {

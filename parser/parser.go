@@ -6,7 +6,7 @@ import (
 )
 
 type Parser struct {
-	tokens  []lexer.Token
+	Tokens  []lexer.Token
 	current lexer.Token
 	index   int
 	//errorCount int // TODO, only do up to 3-5 errors, probably best to go straight to semicolon, or the next line
