@@ -100,7 +100,7 @@ func interpretHandler() http.Handler {
 		//r, err := c.SayHello(ctx, &pb.HelloRequest{Name: *name})
 		reply, err := c.Interpret(ctx, &pb.DiaryRequest{Diary: p.Diary})
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Fatalf("Could not interpret: %v", err)
 		}
 		log.Printf("Diary Output: %s", reply.GetTokens())
 	})
@@ -112,12 +112,14 @@ func main() {
 
 	mux := http.NewServeMux()
 	edh := enqueueDiaryHandler()
+	ih := interpretHandler()
 
 	mux.Handle("/enqueue-diary", edh)
+	mux.Handle("/interpret", ih)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 		log.Printf("Defaulting to port %s", port)
 	}
 
