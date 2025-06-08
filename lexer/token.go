@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"strings"
 )
 
 type TokenType int
@@ -32,4 +33,13 @@ func (t TokenType) String() string {
 
 func (t *Token) String() string {
 	return fmt.Sprintf("Token Type: %d, Lexeme: %s", t.Type, t.Lexeme)
+}
+
+func GetTokensAsString(tokens []Token) string {
+
+	s := []string{}
+	for _, v := range tokens {
+		s = append(s, v.String())
+	}
+	return strings.Join(s, ", ")
 }

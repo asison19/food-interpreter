@@ -3,64 +3,38 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
+	pb "food-interpreter/interpreter/proto"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 
-	"crypto/tls"
-	"crypto/x509"
+	//"crypto/tls"
+	//"crypto/x509"
+
+	//"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure" // TODO secure
+)
 
-
-	"google.golang.org/api/idtoken"
-	"google.golang.org/grpc"
-	grpcMetadata "google.golang.org/grpc/metadata"
+var (
+	addr = flag.String("addr", "localhost:50051", "the address to connect to")
 )
 
 //type LexerPost struct {
 //	Diary string `json:"diary,string,omitempty"`
 //}
 
-func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-	if host != "" {
-		opts = append(opts, grpc.WithAuthority(host))
-	}
-
-	if insecure {
-		opts = append(opts, grpc.WithInsecure())
-	} else {
-		// Note: On the Windows platform, use of x509.SystemCertPool() requires
-		// Go version 1.18 or higher.
-		systemRoots, err := x509.SystemCertPool()
-		if err != nil {
-			return nil, err
-		}
-		cred := credentials.NewTLS(&tls.Config{
-			RootCAs: systemRoots,
-		})
-		opts = append(opts, grpc.WithTransportCredentials(cred))
-	}
-
-	return grpc.Dial(host, opts...)
-}
-
-func pingRequest(conn *grpc.ClientConn, p *pb.Request) (*pb.Response, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	client := pb.NewPingServiceClient(conn)
-	return client.Send(ctx, p)
-}
-
 func enqueueDiaryHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Decode the diary
+		// TODO turn to function
 		var p struct {
 			Diary string `json:"diary"`
 		}
@@ -99,8 +73,40 @@ func enqueueDiaryHandler() http.Handler {
 	})
 }
 
-func main() {
+func interpretHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Decode the diary
+		// TODO turn to function
+		var p struct {
+			Diary string `json:"diary"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
+		// Set up a connection to the server.
+		conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatalf("did not connect: %v", err)
+		}
+		defer conn.Close()
+		c := pb.NewInterpreterServerClient(conn)
+
+		// Contact the server and print out its response.
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		//r, err := c.SayHello(ctx, &pb.HelloRequest{Name: *name})
+		reply, err := c.Interpret(ctx, &pb.DiaryRequest{Diary: p.Diary})
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
+		log.Printf("Diary Output: %s", reply.GetTokens())
+	})
+}
+
+func main() {
 	image_version := os.Getenv("IMAGE_VERSION")
 	log.Printf("Running IMAGE_VERSION: %s", image_version)
 

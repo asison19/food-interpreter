@@ -24,7 +24,7 @@ func ParseTokens(tokens []lexer.Token) Parser {
 }
 
 func (p *Parser) parse() int {
-	for p.index < len(p.tokens) {
+	for p.index < len(p.Tokens) {
 		switch p.check().Type {
 		case lexer.YEAR:
 			p.year()
@@ -42,8 +42,8 @@ func (p *Parser) parse() int {
 // Go to the next token
 func (p *Parser) nextToken() bool {
 	p.index++
-	if p.index < len(p.tokens) {
-		p.current = p.tokens[p.index]
+	if p.index < len(p.Tokens) {
+		p.current = p.Tokens[p.index]
 		return true
 	}
 	return false
@@ -79,7 +79,7 @@ func (p *Parser) year() {
 }
 
 func (p *Parser) check() lexer.Token {
-	return p.tokens[p.index]
+	return p.Tokens[p.index]
 }
 
 // TODO index out of range for 01/23 last in token slice
