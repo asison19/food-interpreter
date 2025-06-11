@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	pb_port = flag.Int("port", 50051, "The server port")
+	pb_port = flag.Int("port", 50051, "The gRPC server port")
 )
 
 //type LexerPost struct {
