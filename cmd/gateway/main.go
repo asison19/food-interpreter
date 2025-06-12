@@ -109,7 +109,7 @@ func interpretHandler() http.Handler {
 
 func main() {
 	image_version := os.Getenv("IMAGE_VERSION")
-	log.Printf("Running IMAGE_VERSION: %s", image_version)
+	log.Printf("Gateway running IMAGE_VERSION: %s", image_version)
 
 	mux := http.NewServeMux()
 	edh := enqueueDiaryHandler()

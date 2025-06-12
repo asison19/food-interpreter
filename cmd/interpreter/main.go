@@ -39,6 +39,7 @@ func interpretHandler() http.Handler {
 		}
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
+			log.Printf("Error decoding Diary: %s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -47,6 +48,7 @@ func interpretHandler() http.Handler {
 
 		tokenBytes, err2 := json.Marshal(parser.Tokens)
 		if err2 != nil {
+			log.Printf("Error marshalling Tokens: %s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -63,7 +65,7 @@ func (s *server) Interpret(ctx context.Context, in *pb.DiaryRequest) (*pb.DiaryR
 func main() {
 
 	image_version := os.Getenv("IMAGE_VERSION")
-	log.Printf("Running IMAGE_VERSION: %s", image_version)
+	log.Printf("Interpreter running IMAGE_VERSION: %s", image_version)
 
 	mux := http.NewServeMux()
 	ih := interpretHandler()
