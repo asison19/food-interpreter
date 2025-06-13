@@ -25,13 +25,14 @@ func ParseTokens(tokens []lexer.Token) Parser {
 
 func (p *Parser) parse() int {
 	for p.index < len(p.Tokens) {
-		switch p.check().Type {
+		token, _ := p.check()
+		switch token.Type {
 		case lexer.YEAR:
 			p.year()
 		case lexer.MONTHANDDAY:
 			p.monthAndDay()
 		default:
-			fmt.Printf("Year or MonthAndDay expected, got %v instead", p.check())
+			fmt.Printf("Year or MonthAndDay expected, got %v instead", token.Type)
 			p.nextToken() // We're allowing a continue
 		}
 		fmt.Println()
@@ -65,7 +66,7 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	if p.accept(tokenType) {
 		return true
 	}
-	fmt.Printf("Error: unexpected symbol %v", p.check())
+	fmt.Printf("Error: unexpected symbol %v", tokenType)
 	return false
 }
 
@@ -74,12 +75,15 @@ func (p *Parser) year() {
 		p.semicolon() // TODO semicolon should be optional. At terminals there should be the error?
 		return
 	}
-	fmt.Printf("Year expected, got %v instead", p.check())
+	fmt.Printf("Year expected, got %v instead", p.Tokens[p.index])
 	p.nextToken() // We're allowing a continue
 }
 
-func (p *Parser) check() lexer.Token {
-	return p.Tokens[p.index]
+func (p *Parser) check() (lexer.Token, bool) {
+	if len(p.Tokens) <= p.index {
+		return lexer.Token{}, true
+	}
+	return p.Tokens[p.index], false
 }
 
 // TODO index out of range for 01/23 last in token slice
@@ -91,8 +95,12 @@ func (p *Parser) monthAndDay() {
 func (p *Parser) time() {
 	p.expect(lexer.TIME)
 
-	// TODO is this the best way of going about this?
-	switch p.check().Type {
+	token, diary_err := p.check()
+	if diary_err {
+		fmt.Printf("Received time token and expected food, repeater, or sleep next.")
+		return
+	}
+	switch token.Type {
 	case lexer.FOOD:
 		p.food()
 	case lexer.REPEATER:
@@ -100,44 +108,59 @@ func (p *Parser) time() {
 	case lexer.SLEEP:
 		p.sleep()
 	default:
-		fmt.Printf("Food, repeater, or sleep expected, got %v instead", p.check())
+		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
 		p.nextToken()
 	}
 
 }
 func (p *Parser) food() {
 	p.expect(lexer.FOOD)
-	switch p.check().Type {
+	token, diary_err := p.check()
+	if diary_err {
+		fmt.Printf("Received food token and expected comma or semicolon next.")
+		return
+	}
+	switch token.Type {
 	case lexer.COMMA: // TODO rename comma nonterminal
 		p.comma()
 	case lexer.SEMICOLON: // TODO turn semicolon to a terminal?
 		p.semicolon()
 	default:
-		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
 	}
 }
 func (p *Parser) repeater() {
 	p.expect(lexer.REPEATER)
-	switch p.check().Type {
+	token, diary_err := p.check()
+	if diary_err {
+		fmt.Printf("Received repeater token and expected comma or semicolon next.")
+		return
+	}
+	switch token.Type {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
 		p.semicolon()
 	default:
-		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
 	}
 }
 func (p *Parser) sleep() {
 	p.expect(lexer.SLEEP)
-	switch p.check().Type {
+	token, diary_err := p.check()
+	if diary_err {
+		fmt.Printf("Received sleep token and expected comma or semicolon next.")
+		return
+	}
+	switch token.Type {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
 		p.semicolon()
 	default:
-		fmt.Printf("Comma, or semicolon expected, got %v instead", p.check())
+		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
 	}
 }

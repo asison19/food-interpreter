@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// TODO foods should be able to have a space in them.
+
 type Lexer struct {
 	position     int
 	nextPosition int
