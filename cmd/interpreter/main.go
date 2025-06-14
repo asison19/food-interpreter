@@ -44,6 +44,7 @@ func interpretHandler() http.Handler {
 			return
 		}
 
+		log.Printf("Diary: " + p.Diary)
 		parser := interpreter.Interpret(p.Diary)
 
 		tokenBytes, err2 := json.Marshal(parser.Tokens)
