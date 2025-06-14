@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	pb_port = flag.Int("port", 50051, "The gRPC server port")
+	grpc_port = flag.Int("port", 50051, "The gRPC server port")
 )
 
 //type LexerPost struct {
@@ -87,7 +87,7 @@ func main() {
 
 	// grpc
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *pb_port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *grpc_port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

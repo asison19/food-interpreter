@@ -76,6 +76,8 @@ func enqueueDiaryHandler() http.Handler {
 
 func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		flag.Parse()
+
 		// Decode the diary
 		// TODO turn to function
 		var p struct {
@@ -95,6 +97,7 @@ func interpretHandler() http.Handler {
 		defer conn.Close()
 		c := pb.NewInterpreterServerClient(conn)
 
+		log.Println("Address of the gRPC server: " + *addr)
 		// Contact the server and print out its response.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
