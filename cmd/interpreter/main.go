@@ -37,21 +37,20 @@ func interpretHandler() http.Handler {
 		}
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
-			log.Printf("Error decoding Diary: %s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		log.Printf("Diary: " + p.Diary)
-		parser := interpreter.Interpret(p.Diary)
+		l := lexer.LexString(p.Diary)
 
-		tokenBytes, err2 := json.Marshal(parser.Tokens)
+		tokenBytes, err2 := json.Marshal(l.Tokens)
 		if err2 != nil {
-			log.Printf("Error marshalling Tokens: %s", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.Write(tokenBytes)
+		log.Printf("Tokens: " + string(tokenBytes))
 	})
 }
 
