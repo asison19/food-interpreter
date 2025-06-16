@@ -25,7 +25,7 @@ resource "google_service_account" "gateway_cloud_run" {
 resource "google_cloud_run_service_iam_binding" "gateway_servicesinvoker" {
   location = google_cloud_run_v2_service.gateway.location
   service  = google_cloud_run_v2_service.gateway.name
-  role     = "roles/run.servicesInvoker"
+  role     = "roles/run.invoker"
   members  = ["serviceAccount:${ google_service_account.gateway_cloud_run.email }"]
 }
 

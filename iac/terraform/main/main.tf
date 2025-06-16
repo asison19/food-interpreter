@@ -52,7 +52,7 @@ resource "google_service_account" "interpreter_cloud_run" {
 resource "google_cloud_run_service_iam_binding" "interpreter_servicesinvoker" {
   location = google_cloud_run_v2_service.interpreter.location
   service  = google_cloud_run_v2_service.interpreter.name
-  role     = "roles/run.servicesInvoker"
+  role     = "roles/run.invoker"
   members  = ["serviceAccount:${ google_service_account.interpreter_cloud_run.email }"]
 }
 
