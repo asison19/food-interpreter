@@ -1,0 +1,10 @@
+{
+    "message": {
+        "data": "eyJkaWFyeSI6ICIxLzIgMzQ1IGFiYywgZGVmIGdoaSJ9",
+        "attributes": {
+        },
+        "messageId": "12345",
+        "publishTime": "12345",
+        "orderingKey": "12345"
+    }
+}

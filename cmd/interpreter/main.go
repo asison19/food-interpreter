@@ -10,6 +10,7 @@ import (
 	"food-interpreter/lexer"
 	"log"
 	//"net"
+	"io"
 	"net/http"
 	"os"
 	//"crypto/tls"
@@ -25,6 +26,18 @@ var (
 //type LexerPost struct {
 //	Diary string `json:"diary,string,omitempty"`
 //}
+
+// WrappedMessage is the payload of a Pub/Sub event.
+//
+// For more information about receiving messages from a Pub/Sub event
+// see: https://cloud.google.com/pubsub/docs/push#receive_push
+type WrappedMessage struct {
+	Message struct {
+		Data []byte `json:"data,omitempty"`
+		ID   string `json:"id"`
+	} `json:"message"`
+	Subscription string `json:"subscription"`
+}
 
 type server struct {
 	pb.UnimplementedInterpreterServerServer // TODO name
@@ -54,6 +67,28 @@ func interpretHandler() http.Handler {
 	})
 }
 
+func pubsubInterpretHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var m WrappedMessage
+		body, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+		if err != nil {
+			log.Printf("io.ReadAll: %v", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		// byte slice unmarshalling handles base64 decoding.
+		if err := json.Unmarshal(body, &m); err != nil {
+			log.Printf("json.Unmarshal: %v", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		diary := string(m.Message.Data)
+		log.Printf("Diary: %s!", diary)
+	})
+}
+
 func (s *server) Interpret(ctx context.Context, in *pb.DiaryRequest) (*pb.DiaryReply, error) {
 	p := interpreter.Interpret(in.GetDiary())
 
@@ -67,8 +102,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	ih := interpretHandler()
+	psih := pubsubInterpretHandler()
 
 	mux.Handle("/interpret", ih)
+	mux.Handle("/pubsub-interpret", psih)
 
 	port := os.Getenv("PORT")
 	if port == "" {
