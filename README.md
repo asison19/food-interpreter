@@ -18,7 +18,7 @@ docker run -it -p 8080:8080 food-interpreter
 ```
 You can now run it by hitting the endpoint like this,
 ```bash
-curl -d '{"diary": "1/2 345 abc def ghi"}' http://localhost:8081/interpret
+curl -d '{"diary": "1/2 345 abc, def, ghi;"}' http://localhost:8081/interpret
 ```
 Which will produce the output,
 ```json

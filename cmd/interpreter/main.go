@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	//"crypto/tls"
 	//"crypto/x509"
 	//"google.golang.org/grpc"
@@ -86,8 +87,42 @@ func pubsubInterpretHandler() http.Handler {
 
 		diary := string(m.Message.Data)
 		log.Printf("Diary: %s!", diary)
+
+		var p struct {
+			Diary string `json:"diary"`
+		}
+		err = json.NewDecoder(strings.NewReader(diary)).Decode(&p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		log.Printf("Diary: " + p.Diary)
+
+		l := lexer.LexString(p.Diary)
+		tokenBytes, err2 := json.Marshal(l.Tokens)
+		if err2 != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Write(tokenBytes)
+		log.Printf("Tokens: " + string(tokenBytes))
 	})
 }
+
+//func normalizeDiary(body *io.ReadCloser) string {
+//	var p struct {
+//		Diary string `json:"diary"`
+//	}
+//	err := json.NewDecoder(body).Decode(&p)
+//	if err != nil {
+//		http.Error(w, err.Error(), http.StatusBadRequest)
+//		return
+//	}
+//
+//	log.Printf("Diary: " + p.Diary)
+//	return p.Diary
+//}
 
 func (s *server) Interpret(ctx context.Context, in *pb.DiaryRequest) (*pb.DiaryReply, error) {
 	p := interpreter.Interpret(in.GetDiary())
