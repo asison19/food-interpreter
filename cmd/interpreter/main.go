@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+
 	//"fmt"
 	"food-interpreter/interpreter"
 	pb "food-interpreter/interpreter/proto"
 	"food-interpreter/lexer"
 	"log"
+
 	//"net"
 	"io"
 	"net/http"
@@ -46,20 +48,16 @@ type server struct {
 
 func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var p struct {
-			Diary string `json:"diary"`
-		}
-		err := json.NewDecoder(r.Body).Decode(&p)
+		diary, err := normalizeDiaryJSON(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		log.Printf("Diary: " + p.Diary)
-		l := lexer.LexString(p.Diary)
+		l := lexer.LexString(diary)
 
-		tokenBytes, err2 := json.Marshal(l.Tokens)
-		if err2 != nil {
+		tokenBytes, err := json.Marshal(l.Tokens)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -85,23 +83,17 @@ func pubsubInterpretHandler() http.Handler {
 			return
 		}
 
-		diary := string(m.Message.Data)
-		log.Printf("Diary: %s!", diary)
+		diaryJSON := string(m.Message.Data)
 
-		var p struct {
-			Diary string `json:"diary"`
-		}
-		err = json.NewDecoder(strings.NewReader(diary)).Decode(&p)
+		diary, err := normalizeDiaryJSON(strings.NewReader(diaryJSON))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		log.Printf("Diary: " + p.Diary)
-
-		l := lexer.LexString(p.Diary)
-		tokenBytes, err2 := json.Marshal(l.Tokens)
-		if err2 != nil {
+		l := lexer.LexString(diary)
+		tokenBytes, err := json.Marshal(l.Tokens)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -110,19 +102,17 @@ func pubsubInterpretHandler() http.Handler {
 	})
 }
 
-//func normalizeDiary(body *io.ReadCloser) string {
-//	var p struct {
-//		Diary string `json:"diary"`
-//	}
-//	err := json.NewDecoder(body).Decode(&p)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	log.Printf("Diary: " + p.Diary)
-//	return p.Diary
-//}
+func normalizeDiaryJSON(body io.Reader) (string, error) {
+	var p struct {
+		Diary string `json:"diary"`
+	}
+	err := json.NewDecoder(body).Decode(&p)
+	if err != nil {
+		return "", err
+	}
+	log.Printf("Diary: " + p.Diary)
+	return p.Diary, nil
+}
 
 func (s *server) Interpret(ctx context.Context, in *pb.DiaryRequest) (*pb.DiaryReply, error) {
 	p := interpreter.Interpret(in.GetDiary())
