@@ -4,18 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-
-	//"fmt"
-	"food-interpreter/interpreter"
-	pb "food-interpreter/interpreter/proto"
-	"food-interpreter/lexer"
-	"log"
-
-	//"net"
+	"fmt"
 	"io"
+	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
+
+	"food-interpreter/interpreter"
+	pb "food-interpreter/interpreter/proto"
+	"food-interpreter/lexer"
+
+	"google.golang.org/grpc"
 	//"crypto/tls"
 	//"crypto/x509"
 	//"google.golang.org/grpc"
@@ -132,28 +133,30 @@ func main() {
 	mux.Handle("/interpret", ih)
 	mux.Handle("/pubsub-interpret", psih)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("Defaulting to port %s", port)
-	}
-	log.Printf("Listening on port %s", port)
+	go func() {
+		// http
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "8080"
+			log.Printf("Defaulting to port %s", port)
+		}
+		log.Printf("Listening on port %s", port)
 
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
-		log.Fatal(err)
-	}
+		if err := http.ListenAndServe(":"+port, mux); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// grpc
-	//flag.Parse()
-	//lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *grpc_port))
-	//if err != nil {
-	//	log.Fatalf("failed to listen: %v", err)
-	//}
-	//s := grpc.NewServer()
-	////pb.RegisterGreeterServer(s, &server{})
-	//pb.RegisterInterpreterServerServer(s, &server{})
-	//log.Printf("server listening at %v", lis.Addr())
-	//if err := s.Serve(lis); err != nil {
-	//	log.Fatalf("failed to serve: %v", err)
-	//}
+	flag.Parse()
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *grpc_port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterInterpreterServerServer(s, &server{})
+	log.Printf("server listening at %v", lis.Addr())
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

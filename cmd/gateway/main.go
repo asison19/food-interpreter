@@ -24,7 +24,6 @@ import (
 )
 
 var (
-	//addr = flag.String("addr", "localhost:50051", "the address to connect to")
 	addr = flag.String("addr", os.Getenv("INTERPRETER_CLOUD_RUN_URI")+":50051", "The gRPC server address to connect to")
 )
 
@@ -101,7 +100,6 @@ func interpretHandler() http.Handler {
 		// Contact the server and print out its response.
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		//r, err := c.SayHello(ctx, &pb.HelloRequest{Name: *name})
 		reply, err := c.Interpret(ctx, &pb.DiaryRequest{Diary: p.Diary})
 		if err != nil {
 			log.Fatalf("Could not interpret: %v", err)
