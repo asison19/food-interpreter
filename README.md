@@ -11,12 +11,23 @@ Comments:
 ![days](Documentation/diagram_002.png)  
 
 ## Usage
-To run this project locally, install your choice of containerization tool such as Docker Desktop on your machine and run the following commands,
+To run this locally without containers run the gateway and interpreter using these commands,
+```bash
+go run cmd/gateway/main.go --addr localhost:443
+```
+```bash
+go run cmd/interpreter/main.go
+```
+
+### Locally With Containers
+To run this project locally through containers, install your choice of containerization tool such as Docker Desktop on your machine and run the following commands,
 ```
 docker compose build
 docker run -it -p 8080:8080 food-interpreter
 ```
-You can now run it by hitting the endpoint like this,
+
+### Manually testing
+You can now run it by hitting the gateway endpoint like this,
 ```bash
 curl -d '{"diary": "1/2 345 abc, def, ghi;"}' http://localhost:8081/interpret
 ```
