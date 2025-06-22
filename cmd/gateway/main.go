@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	addr = flag.String("addr", os.Getenv("INTERPRETER_CLOUD_RUN_URI")+":443", "The gRPC server address to connect to")
+	addr = flag.String("addr", os.Getenv("INTERPRETER_CLOUD_RUN_URI"), "The gRPC server address to connect to")
 )
 
 //type LexerPost struct {
@@ -60,7 +60,7 @@ func enqueueDiaryHandler() http.Handler {
 
 		// Publish a message
 		result := topic.Publish(ctx, &pubsub.Message{
-			Data: []byte(p.Diary),
+			Data: []byte("{\"diary\": \"" + p.Diary + "\"}"),
 		})
 
 		// Get the message ID
