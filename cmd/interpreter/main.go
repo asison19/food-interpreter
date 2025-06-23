@@ -1,22 +1,16 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"strings"
 
-	"food-interpreter/interpreter"
 	pb "food-interpreter/interpreter/proto"
 	"food-interpreter/lexer"
-
-	"google.golang.org/grpc"
 	//"crypto/tls"
 	//"crypto/x509"
 	//"google.golang.org/grpc"
@@ -24,7 +18,7 @@ import (
 )
 
 var (
-	grpc_port = flag.Int("port", 443, "The gRPC server port")
+	port = flag.String("port", os.Getenv("PORT"), "The port to listen to for HTTP requests.")
 )
 
 //type LexerPost struct {
@@ -49,6 +43,7 @@ type server struct {
 
 func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("interpretHandler")
 		diary, err := normalizeDiaryJSON(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -115,13 +110,8 @@ func normalizeDiaryJSON(body io.Reader) (string, error) {
 	return p.Diary, nil
 }
 
-func (s *server) Interpret(ctx context.Context, in *pb.DiaryRequest) (*pb.DiaryReply, error) {
-	p := interpreter.Interpret(in.GetDiary())
-
-	return &pb.DiaryReply{Tokens: lexer.GetTokensAsString(p.Tokens)}, nil
-}
-
 func main() {
+	flag.Parse()
 
 	image_version := os.Getenv("IMAGE_VERSION")
 	log.Printf("Interpreter running IMAGE_VERSION: %s", image_version)
@@ -133,30 +123,10 @@ func main() {
 	mux.Handle("/interpret", ih)
 	mux.Handle("/pubsub-interpret", psih)
 
-	go func() {
-		// http
-		port := os.Getenv("PORT")
-		if port == "" {
-			port = "8080"
-			log.Printf("Defaulting to port %s", port)
-		}
-		log.Printf("Listening on port %s", port)
+	// http
+	log.Printf("Listening on port %s", *port)
 
-		if err := http.ListenAndServe(":"+port, mux); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	// grpc
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *grpc_port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	pb.RegisterInterpreterServerServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err := http.ListenAndServe(":"+*port, mux); err != nil {
+		log.Fatal(err)
 	}
 }
