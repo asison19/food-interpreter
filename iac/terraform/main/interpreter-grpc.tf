@@ -18,7 +18,7 @@ resource "google_cloud_run_v2_service" "interpreter_grpc" {
 }
 
 resource "google_service_account" "interpreter_grpc_cloud_run" {
-  account_id   = "Interpreter-grpc-cloud-run"
+  account_id   = "interpreter-grpc-cloud-run"
   display_name = "Interpreter gRPC Cloud Run Service Account"
 }
 
@@ -30,7 +30,7 @@ resource "google_cloud_run_service_iam_binding" "interpreter_grpc_servicesinvoke
 }
 
 # TODO, this keeps getting the service account rewritten?
-resource "google_project_iam_binding" "gateway_logwriter" {
+resource "google_project_iam_binding" "interpreter_grpc_logwriter" {
   project = var.GCP_PROJECT_ID
   role    = "roles/logging.logWriter"
   members = ["serviceAccount:${ google_service_account.interpreter_grpc_cloud_run.email }"]
