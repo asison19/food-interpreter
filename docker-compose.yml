@@ -8,3 +8,7 @@ services:
     build:
       context: .
       dockerfile: docker/interpreter/Dockerfile
+  interpreter-grpc:
+    build:
+      context: .
+      dockerfile: docker/interpreter-grpc/Dockerfile
