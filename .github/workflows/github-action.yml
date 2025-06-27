@@ -109,10 +109,10 @@ jobs:
         working-directory: ${{ github.workspace }}/iac/terraform/main
         run: echo "$(terraform output --json)" | jq -r 'keys[] as $k | "\($k)=\(.[$k].value)"' >> $GITHUB_OUTPUT
   # TODO don't push (or generate) a new image if it never changed. Breaks this workflow and the Terraform apply. ArgoCD?
-  # TODO generate images for other branches
-  # TODO should be able to push without needing to run terraform apply everytime. Once GAR and topic (for interpreter) are created, we only need the name/id.
+  # TODO should be able to push without needing to run terraform apply everytime. Once GAR and topic (for interpreter) are created, we only need the name/id. Variabilize topic? GAR needs?
+  # TODO Terraform-apply fails if there's no image for the Cloud run service
   push-docker-image:
-    needs: [run-tests, generate-release]
+    needs: [run-tests, generate-release, terraform-apply]
     environment: prod
     permissions:
       contents: read

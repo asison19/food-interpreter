@@ -98,7 +98,7 @@ func interpretHandler() http.Handler {
 
 		log.Println("Address of the gRPC server: " + *addr)
 		// Contact the server and print out its response.
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 		reply, err := c.Interpret(ctx, &pb.DiaryRequest{Diary: p.Diary})
 		if err != nil {
