@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
-      interpreter_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_cloud_run_uri }}
+      interpreter_grpc_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_grpc_cloud_run_uri }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
@@ -161,7 +161,7 @@ jobs:
             IMAGE_VERSION=${{ needs.generate-release.outputs.version }}
             GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
             TOPIC_ID=${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}
-            INTERPRETER_CLOUD_RUN_URI=${{ needs.terraform-apply.outputs.interpreter_cloud_run_uri }}
+            INTERPRETER_GRPC_CLOUD_RUN_URI=${{ needs.terraform-apply.outputs.interpreter_grpc_cloud_run_uri }}
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest

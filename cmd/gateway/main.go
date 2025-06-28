@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	addr = flag.String("addr", os.Getenv("INTERPRETER_CLOUD_RUN_URI"), "The gRPC server address to connect to")
+	addr = flag.String("addr", os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI"), "The gRPC server address to connect to")
 )
 
 //type LexerPost struct {
