@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -24,12 +25,21 @@ import (
 )
 
 var (
-	addr = flag.String("addr", os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI"), "The gRPC server address to connect to")
+	addr = flag.String("addr", removeScheme(os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI")), "The gRPC server address to connect to")
 )
 
 //type LexerPost struct {
 //	Diary string `json:"diary,string,omitempty"`
 //}
+
+func removeScheme(urlStr string) string {
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		panic(err)
+	}
+	u.Scheme = ""
+	return u.String()
+}
 
 func enqueueDiaryHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
