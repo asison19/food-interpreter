@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -38,7 +39,8 @@ func removeScheme(urlStr string) string {
 		panic(err)
 	}
 	u.Scheme = ""
-	return u.String()
+	r, _ := regexp.Compile("[^/].*")
+	return r.FindString(u.String())
 }
 
 func enqueueDiaryHandler() http.Handler {
