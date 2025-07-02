@@ -40,8 +40,8 @@ func main() {
 	flag.Parse()
 
 	image_version := os.Getenv("IMAGE_VERSION")
-	log.Printf("Interpreter running IMAGE_VERSION: %s", image_version)
-	log.Printf("gRPC service starting on port %s", *grpc_port)
+	log.Printf("Interpreter gRPC service running IMAGE_VERSION: %s", image_version)
+	log.Printf("Interpreter gRPC service starting on port %s", *grpc_port)
 
 	// grpc
 	lis, err := net.Listen("tcp", ":"+*grpc_port)

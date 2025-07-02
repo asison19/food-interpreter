@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"flag"
+	"fmt"
 	pb "food-interpreter/interpreter/proto"
 	"io"
 	"log"
@@ -16,17 +19,16 @@ import (
 
 	"cloud.google.com/go/pubsub"
 
-	//"crypto/tls"
-	//"crypto/x509"
-
-	//"google.golang.org/grpc/credentials"
-
+	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure" // TODO secure
+	grpcMetadata "google.golang.org/grpc/metadata"
 )
 
 var (
-	addr = flag.String("addr", removeScheme(os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI")), "The gRPC server address to connect to")
+	addr     = flag.String("addr", removeScheme(os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI")), "The gRPC server address to connect to")
+	isSecure = flag.Bool("secure", true, "Whether to use secure authenticated gRPC requests.")
 )
 
 //type LexerPost struct {
@@ -85,6 +87,70 @@ func enqueueDiaryHandler() http.Handler {
 	})
 }
 
+// NewConn creates a new gRPC connection.
+// host should be of the form domain:port, e.g., example.com:443
+func NewConn(host string, isSecure bool) (*grpc.ClientConn, error) {
+	var opts []grpc.DialOption
+	if host != "" {
+		opts = append(opts, grpc.WithAuthority(host))
+	}
+
+	if !isSecure {
+		fmt.Println(isSecure)
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		// Note: On the Windows platform, use of x509.SystemCertPool() requires
+		// Go version 1.18 or higher.
+		systemRoots, err := x509.SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
+		cred := credentials.NewTLS(&tls.Config{
+			RootCAs: systemRoots,
+		})
+		opts = append(opts, grpc.WithTransportCredentials(cred))
+	}
+
+	return grpc.NewClient(host, opts...)
+}
+
+// pingRequest sends a new gRPC ping request to the server configured in the connection.
+func interpretRequest(conn *grpc.ClientConn, p *pb.DiaryRequest) (*pb.DiaryReply, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	c := pb.NewInterpreterServerClient(conn)
+	return c.Interpret(ctx, p)
+}
+
+// pingRequestWithAuth mints a new Identity Token for each request.
+// This token has a 1 hour expiry and should be reused.
+// audience must be the auto-assigned URL of a Cloud Run service or HTTP Cloud Function without port number.
+func interpretRequestWithAuth(conn *grpc.ClientConn, p *pb.DiaryRequest, audience string) (*pb.DiaryReply, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Create an identity token.
+	// With a global TokenSource tokens would be reused and auto-refreshed at need.
+	// A given TokenSource is specific to the audience.
+	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
+	if err != nil {
+		return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
+	}
+	token, err := tokenSource.Token()
+	if err != nil {
+		return nil, fmt.Errorf("TokenSource.Token: %w", err)
+	}
+
+	// Add token to gRPC Request.
+	ctx = grpcMetadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token.AccessToken)
+
+	// Send the request.
+
+	c := pb.NewInterpreterServerClient(conn)
+	return c.Interpret(ctx, p)
+}
+
 func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flag.Parse()
@@ -99,20 +165,23 @@ func interpretHandler() http.Handler {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Println("Address of the gRPC server: " + *addr)
 
 		// Set up a connection to the server.
-		conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := NewConn(*addr, *isSecure) // TODO variablelize
 		if err != nil {
 			log.Fatalf("did not connect: %v", err)
 		}
 		defer conn.Close()
-		c := pb.NewInterpreterServerClient(conn)
 
-		log.Println("Address of the gRPC server: " + *addr)
-		// Contact the server and print out its response.
-		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
-		reply, err := c.Interpret(ctx, &pb.DiaryRequest{Diary: p.Diary})
+		reply := &pb.DiaryReply{}
+		if !*isSecure {
+			fmt.Println(*isSecure)
+			reply, err = interpretRequest(conn, &pb.DiaryRequest{Diary: p.Diary})
+		} else {
+			reply, err = interpretRequestWithAuth(conn, &pb.DiaryRequest{Diary: p.Diary}, *addr)
+		}
+
 		if err != nil {
 			log.Fatalf("Could not interpret: %v", err)
 		}
