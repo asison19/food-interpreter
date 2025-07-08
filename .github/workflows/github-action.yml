@@ -151,6 +151,8 @@ jobs:
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:${{ env.SHA_SHORT }}
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:${{ needs.generate-release.outputs.version }}
+      - name: Create interpreter gRPC key file
+        run: echo ${{ needs.terraform-apply.outputs.interpreter_grpc_sa_key }} > interpreter_grpc_sa_key.txt
       - name: Push Gateway Docker Image
         uses: docker/build-push-action@v2
         with:
@@ -162,6 +164,7 @@ jobs:
             GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
             TOPIC_ID=${{ needs.terraform-apply.outputs.interpreter_pubsub_topic_id }}
             INTERPRETER_GRPC_CLOUD_RUN_URI=${{ needs.terraform-apply.outputs.interpreter_grpc_cloud_run_uri }}
+            GOOGLE_APPLICATION_CREDENTIALS="interpreter_grpc_sa_key.txt"
           # TODO semantic versioning only happens on master branch. Make it such that other branches have branch name in it for the version to differentiate and have it possible for other branches to push to push to GCP.
           tags: |
             us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest
