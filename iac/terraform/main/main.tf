@@ -56,10 +56,14 @@ resource "google_cloud_run_service_iam_binding" "interpreter_servicesinvoker" {
   members  = ["serviceAccount:${ google_service_account.interpreter_cloud_run.email }"]
 }
 
-resource "google_project_iam_binding" "interpreter_logwriter" {
+resource "google_project_iam_binding" "logwriter" {
   project = var.GCP_PROJECT_ID
   role    = "roles/logging.logWriter"
-  members = ["serviceAccount:${ google_service_account.interpreter_cloud_run.email }"]
+  members = [
+    "serviceAccount:${ google_service_account.interpreter_cloud_run.email}",
+    "serviceAccount:${ google_service_account.gateway_cloud_run.email}",
+    "serviceAccount:${ google_service_account.interpreter_grpc_cloud_run.email }"
+  ]
 }
 
 resource "google_project_service_identity" "pubsub_agent" {
