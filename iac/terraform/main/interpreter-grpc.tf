@@ -35,20 +35,3 @@ resource "google_cloud_run_service_iam_binding" "interpreter_grpc_servicesinvoke
     "serviceAccount:${ google_service_account.gateway_cloud_run.email }"
   ]
 }
-
-#
-# Service account key for gateway to interpreter-grpc
-#
-
-# note this requires the terraform to be run regularly
-resource "time_rotating" "interpreter_grpc" {
-  rotation_days = 30
-}
-
-resource "google_service_account_key" "interpeter_grpc" {
-  service_account_id = google_service_account.interpreter_grpc_cloud_run.name
-
-  keepers = {
-    rotation_time = time_rotating.interpreter_grpc.rotation_rfc3339
-  }
-}
