@@ -16,6 +16,9 @@ resource "google_cloud_run_v2_service" "gateway" {
     }
     service_account = google_service_account.gateway_cloud_run.id
   }
+  depends_on = [
+    google_project_iam_member.gateway_act_as
+  ]
 }
 
 resource "google_service_account" "gateway_cloud_run" {
@@ -35,4 +38,10 @@ resource "google_pubsub_topic_iam_binding" "binding" {
   topic   = google_pubsub_topic.interpreter.id
   role    = "roles/pubsub.publisher"
   members = ["serviceAccount:${ google_service_account.gateway_cloud_run.email }"]
+}
+
+resource "google_project_iam_member" "gateway_act_as" {
+  project = data.google_project.project.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${ google_service_account.gateway_cloud_run.email }"
 }
