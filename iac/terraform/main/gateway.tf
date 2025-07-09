@@ -14,7 +14,7 @@ resource "google_cloud_run_v2_service" "gateway" {
         }
       }
     }
-    service_account = google_service_account.gateway_cloud_run.id
+    service_account = google_service_account.gateway_cloud_run.email
   }
   depends_on = [
     google_project_iam_member.gateway_act_as
