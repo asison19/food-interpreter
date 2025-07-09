@@ -14,6 +14,7 @@ resource "google_cloud_run_v2_service" "gateway" {
         }
       }
     }
+    service_account = google_service_account.gateway_cloud_run.id
   }
 }
 
