@@ -179,7 +179,7 @@ func interpretHandler() http.Handler {
 			fmt.Println(*isSecure)
 			reply, err = interpretRequest(conn, &pb.DiaryRequest{Diary: p.Diary})
 		} else {
-			reply, err = interpretRequestWithAuth(conn, &pb.DiaryRequest{Diary: p.Diary}, *addr)
+			reply, err = interpretRequestWithAuth(conn, &pb.DiaryRequest{Diary: p.Diary}, os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI"))
 		}
 
 		if err != nil {
