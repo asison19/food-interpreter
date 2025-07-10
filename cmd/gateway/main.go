@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	addr     = flag.String("addr", removeScheme(os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI")), "The gRPC server address to connect to")
+	addr     = flag.String("addr", os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI"), "The gRPC server address to connect to")
 	isSecure = flag.Bool("secure", true, "Whether to use secure authenticated gRPC requests.")
 )
 
@@ -167,8 +167,18 @@ func interpretHandler() http.Handler {
 		}
 		log.Println("Address of the gRPC server: " + *addr)
 
+		// Check if address contains a scheme, if so, remove it.
+		// TODO check if this is still necessary.
+		host := *addr
+		u, err := url.Parse(*addr)
+		if err != nil {
+			panic(err)
+		}
+		if u.Scheme == "http" || u.Scheme == "https" {
+			host = removeScheme(host)
+		}
 		// Set up a connection to the server.
-		conn, err := NewConn(*addr, *isSecure) // TODO variablelize
+		conn, err := NewConn(host, *isSecure)
 		if err != nil {
 			log.Fatalf("did not connect: %v", err)
 		}
@@ -179,7 +189,7 @@ func interpretHandler() http.Handler {
 			fmt.Println(*isSecure)
 			reply, err = interpretRequest(conn, &pb.DiaryRequest{Diary: p.Diary})
 		} else {
-			reply, err = interpretRequestWithAuth(conn, &pb.DiaryRequest{Diary: p.Diary}, os.Getenv("INTERPRETER_GRPC_CLOUD_RUN_URI"))
+			reply, err = interpretRequestWithAuth(conn, &pb.DiaryRequest{Diary: p.Diary}, *addr)
 		}
 
 		if err != nil {
