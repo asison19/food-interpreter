@@ -90,6 +90,7 @@ func enqueueDiaryHandler() http.Handler {
 // NewConn creates a new gRPC connection.
 // host should be of the form domain:port, e.g., example.com:443
 func NewConn(host string, isSecure bool) (*grpc.ClientConn, error) {
+	log.Println("Setting up new gRPC connection to: " + host)
 	var opts []grpc.DialOption
 	if host != "" {
 		opts = append(opts, grpc.WithAuthority(host))

@@ -18,6 +18,9 @@ go run cmd/gateway/main.go --addr localhost:443
 ```bash
 go run cmd/interpreter/main.go
 ```
+```bash
+go run cmd/interpreter-grpc/main.go --port 443
+```
 
 ### Locally With Containers
 To run this project locally through containers, install your choice of containerization tool such as Docker Desktop on your machine and run the following commands,
