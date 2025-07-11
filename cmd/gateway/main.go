@@ -197,6 +197,7 @@ func interpretHandler() http.Handler {
 			log.Fatalf("Could not interpret: %v", err)
 		}
 		log.Printf("Diary Output: %s", reply.GetTokens())
+		io.WriteString(w, "Diary Output: "+reply.GetTokens())
 	})
 }
 
