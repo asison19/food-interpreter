@@ -81,6 +81,7 @@ jobs:
     outputs:
       interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
       interpreter_grpc_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_grpc_cloud_run_uri }}
+      gateway_cloud_run_uri: ${{ steps.terraform-output.outputs.gateway_cloud_run_uri }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
@@ -185,3 +186,7 @@ jobs:
           gcloud run services update "interpreter-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "interpreter-grpc-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter-grpc:latest --region ${{ vars.GCP_PROJECT_REGION }}
+      - name: Test gRPC endpoint
+        env:
+          gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
+        run: ./tests/scripts/grpc-full-test.sh
