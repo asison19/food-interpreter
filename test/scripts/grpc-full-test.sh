@@ -5,7 +5,7 @@ expected_output="Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme
 
 response=$(curl -s -H "Authorization: bearer $(gcloud auth print-identity-token)" -d $input "$gateway_uri/interpret")
 
-if [$response != $expected_output]; then
+if [ $response != $expected_output ]; then
     echo "Got: $response; expected: $expected_output"
     exit 1
 fi
