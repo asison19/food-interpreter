@@ -6,4 +6,6 @@ if [ "$BRANCH_NAME" != "master" ]; then
 else
   TAG_FORMAT="v\${version}"
 fi
+
+npm install @semantic-release/commit-analyzer -D
 npx semantic-release --tag-format "${TAG_FORMAT}"
