@@ -207,5 +207,5 @@ jobs:
       - name: Test gRPC endpoint
         env:
           gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
-          CLOUDSDK_AUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          CLOUDSDK_AUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.id_token }}
         run: ./test/scripts/grpc-full-test.sh
