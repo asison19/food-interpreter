@@ -216,5 +216,5 @@ jobs:
         run: |
           header="Authorization: bearer $id_token"
           endpoint="$gateway_uri/interpret"
-          response=$(curl -s -H $header -d $input $endpoint)
+          response=$(curl -s -H $header -d '$input' $endpoint)
           echo "Got: $response"
