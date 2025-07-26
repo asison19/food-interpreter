@@ -214,5 +214,7 @@ jobs:
           service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
           id_token: ${{ steps.auth.outputs.id_token }}
         run: |
-          response=$(curl -s -H "Authorization: bearer $id_token" -d '$input' $gateway_uri/interpret)
+          header="Authorization: bearer $id_token"
+          endpoint="$gateway_uri/interpret"
+          response=$(curl -s -H $header -d $input $endpoint)
           echo "Got: $response"
