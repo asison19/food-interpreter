@@ -216,7 +216,8 @@ jobs:
           #id_token: ${{ steps.auth.outputs.id_token }}
         run: |
           gcloud info
-          id_token=$(gcloud auth print-identity-token --audiences='$gateway_uri')
+          gcloud config list account --format "value(core.account)"
+          id_token=$(gcloud auth print-identity-token)
           header="Authorization: bearer $id_token"
           endpoint="$gateway_uri/interpret"
           response=$(curl -s -H $header -d '$input' $endpoint)
