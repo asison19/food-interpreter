@@ -212,7 +212,7 @@ jobs:
           ID_TOKEN: ${{ steps.auth.outputs.access_token }}
         run: |
           gcloud config set account $service_account
-          ID_TOKEN=${gcloud auth print-identity-token}
+          ID_TOKEN=$(gcloud auth print-identity-token)
           header="Authorization: bearer $ID_TOKEN"
           endpoint="$gateway_uri/interpret"
           response=$(curl -s -H '$header' -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
