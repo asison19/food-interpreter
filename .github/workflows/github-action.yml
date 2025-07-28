@@ -82,6 +82,7 @@ jobs:
       interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
       interpreter_grpc_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_grpc_cloud_run_uri }}
       gateway_cloud_run_uri: ${{ steps.terraform-output.outputs.gateway_cloud_run_uri }}
+      gateway_service_account: ${{ steps.terraform-output.outputs.gateway_service_account }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
@@ -207,7 +208,7 @@ jobs:
         env:
           gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
           expected_output: "Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme: 345, Token Type: 4, Lexeme: abc, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: def, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: ghi, Token Type: 1, Lexeme: ;"
-          service_account: '${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}'
+          service_account: '${{ needs.terraform-apply.outputs.gateway_service_account }}'
         run: |
           ID_TOKEN=$(gcloud auth print-identity-token --impersonate-service-account=$service_account)
           header="Authorization: bearer $ID_TOKEN"
