@@ -207,11 +207,9 @@ jobs:
         env:
           gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
           expected_output: "Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme: 345, Token Type: 4, Lexeme: abc, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: def, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: ghi, Token Type: 1, Lexeme: ;"
+          service_account: '${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}'
         run: |
-          ID_TOKEN=$(curl -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}:generateIdToken \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ steps.auth.outputs.access_token }}gcloud auth print-access-token)" \
-            -d '{"audience": "$gateway_uri/interpret", "includeEmail": "true"}')
+          ID_TOKEN=$(gcloud auth print-identity-token --impersonate-service-account=$service_account)
           header="Authorization: bearer $ID_TOKEN"
           endpoint="$gateway_uri/interpret"
           response=$(curl -s -H '$header' -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
