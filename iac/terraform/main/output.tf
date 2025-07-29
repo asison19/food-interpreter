@@ -12,4 +12,5 @@ output "gateway_cloud_run_uri" {
 
 output "gateway_service_account_key" {
     value = google_service_account_key.gateway_cloud_run.private_key
+    sensitive = true
 }
