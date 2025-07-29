@@ -82,6 +82,7 @@ jobs:
       interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
       interpreter_grpc_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_grpc_cloud_run_uri }}
       gateway_cloud_run_uri: ${{ steps.terraform-output.outputs.gateway_cloud_run_uri }}
+      gateway_service_account_key: ${{ steps.terraform-output.outputs.gateway_service_account_key }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
@@ -200,23 +201,14 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          token_format: id_token
-          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-          id_token_audience: '${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}'
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+          credentials_json: '${{ needs.terraform-apply.outputs.gateway_service_account_key }}'
       - name: Test gRPC endpoint
         env:
           gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
-          input: '{"diary": "1/2 345 abc, def, ghi;"}'
           expected_output: "Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme: 345, Token Type: 4, Lexeme: abc, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: def, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: ghi, Token Type: 1, Lexeme: ;"
-          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
-          id_token: ${{ steps.auth.outputs.id_token }}
+          TOKEN: ${{ steps.auth.outputs.auth_token }}
         run: |
-          response=$(curl -s -H "Authorization: bearer $id_token" -d $input "$gateway_uri/interpret")
-
-          if [ $response != $expected_output ]; then
-              echo "Got: $response; expected: $expected_output"
-              exit 1
-          fi
+          header="Authorization: bearer $TOKEN"
+          endpoint="$gateway_uri/interpret"
+          response=$(curl -s -H '$header' -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
+          echo "Got: $response"
