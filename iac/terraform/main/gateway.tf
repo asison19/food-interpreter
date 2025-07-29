@@ -49,7 +49,7 @@ resource "google_project_iam_member" "gateway_act_as" {
 #
 # Used for GitHub Actions API Testing
 #
-resource "google_project_iam_member" "gateway_act_as" {
+resource "google_project_iam_member" "gateway_token_creator" {
   project = data.google_project.project.project_id
   role    = "roles/iam.serviceAccountTokenCreator"
   member  = "serviceAccount:${ google_service_account.gateway_cloud_run.email }"
