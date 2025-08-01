@@ -188,7 +188,7 @@ jobs:
           gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "interpreter-grpc-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter-grpc:latest --region ${{ vars.GCP_PROJECT_REGION }}
   api-testing:
-    needs: [terraform-apply]
+    needs: [push-docker-image, terraform-apply]
     environment: prod
     permissions:
       contents: read
