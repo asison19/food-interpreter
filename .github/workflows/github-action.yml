@@ -187,28 +187,3 @@ jobs:
           gcloud run services update "interpreter-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "gateway-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-gateway:latest --region ${{ vars.GCP_PROJECT_REGION }}
           gcloud run services update "interpreter-grpc-cloud-run" --image us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/food-interpreter-repository/food-interpreter-interpreter-grpc:latest --region ${{ vars.GCP_PROJECT_REGION }}
-  api-testing:
-    needs: [push-docker-image, terraform-apply]
-    environment: prod
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Github Actions checkout
-        uses: actions/checkout@v4.2.2
-      - name: Setup Workload Identity Federation
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ needs.terraform-apply.outputs.gateway_service_account_key }}'
-      - name: Test gRPC endpoint
-        env:
-          gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
-          expected_output: "Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme: 345, Token Type: 4, Lexeme: abc, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: def, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: ghi, Token Type: 1, Lexeme: ;"
-          key_path: ${{ steps.auth.outputs.auth_token }}
-        run: |
-          header="Authorization: bearer $(gcloud auth print-identity-token)"
-          endpoint="$gateway_uri/interpret"
-          response=$(curl -s -H '$header' -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
-          echo "Got: $response"
