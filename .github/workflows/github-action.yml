@@ -205,5 +205,5 @@ jobs:
           gcloud auth activate-service-account ${{ secrets.API_TESTING_SERVICE_ACCOUNT }} --key-file=sa.json --project=${{ vars.GCP_PROJECT_ID }}
           header="Authorization: bearer $(gcloud auth print-identity-token)"
           endpoint="$gateway_uri/interpret"
-          response=$(curl -s -H '$header' -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
+          response=$(curl -s -H "$header" -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
           echo "Got: $response"
