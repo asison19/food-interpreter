@@ -21,15 +21,13 @@ jobs:
         with:
           working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Plan
-        run: |
-          terraform plan
-          echo "version:" ${{ needs.generate-release.outputs.version }}
+        run: terraform plan
         working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
   terraform-apply:
-    needs: [generate-release, terraform-plan]
+    needs: [terraform-plan]
     environment: prod
     permissions:
       contents: 'read'
@@ -49,15 +47,13 @@ jobs:
         with:
           working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
       - name: Run Terraform Apply
-        run: |
-          terraform apply -auto-approve
-          echo "version:" ${{ needs.generate-release.outputs.version }}
+        run:  terraform apply -auto-approve
         working-directory: ${{ github.workspace }}/iac/terraform/kubernetes
         env:
           TF_VAR_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_GCP_PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
   terraform-destroy:
-    needs: [generate-release, terraform-apply]
+    needs: [terraform-apply]
     environment: prod
     permissions:
       contents: 'read'
