@@ -6,7 +6,7 @@ resource "google_cloud_run_v2_service" "gateway" {
   template {
     timeout = "10s"
     containers {
-      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter-gateway:latest"
+      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter-gateway"
       resources {
         limits = {
           memory = "1024Mi"

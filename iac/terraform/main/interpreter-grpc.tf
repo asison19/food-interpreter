@@ -6,7 +6,7 @@ resource "google_cloud_run_v2_service" "interpreter_grpc" {
   template {
     timeout = "10s"
     containers {
-      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter-interpreter-grpc:latest"
+      image = "${ var.GCP_PROJECT_REGION }-docker.pkg.dev/${ var.GCP_PROJECT_ID }/${ google_artifact_registry_repository.food-interpreter-repository.name }/food-interpreter-interpreter-grpc"
       ports {
         name           = "h2c"
         container_port = 8080
