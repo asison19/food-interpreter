@@ -203,7 +203,15 @@ jobs:
         run: |
           echo '${{ secrets.API_TESTING_SERVICE_ACCOUNT_KEY }}' > sa.json
           gcloud auth activate-service-account ${{ secrets.API_TESTING_SERVICE_ACCOUNT }} --key-file=sa.json --project=${{ vars.GCP_PROJECT_ID }}
+
           header="Authorization: bearer $(gcloud auth print-identity-token)"
           endpoint="$gateway_uri/interpret"
+
           response=$(curl -s -H "$header" -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
+
+          expected_output="Diary Output: Token Type: 2, Lexeme: 1/2, Token Type: 3, Lexeme: 345, Token Type: 4, Lexeme: abc, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: def, Token Type: 6, Lexeme: ,, Token Type: 4, Lexeme: ghi, Token Type: 1, Lexeme: ;"
+          if [ $response != $expected_output ]; then
+              echo -e "Got: $response\nexpected: $expected_output"
+              exit 1
+          fi
           echo "Got: $response"
