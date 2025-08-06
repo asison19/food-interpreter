@@ -45,25 +45,3 @@ resource "google_project_iam_member" "gateway_act_as" {
   role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${ google_service_account.gateway_cloud_run.email }"
 }
-
-#
-# Used for GitHub Actions API Testing
-#
-resource "google_project_iam_member" "gateway_token_creator" {
-  project = data.google_project.project.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:${ google_service_account.gateway_cloud_run.email }"
-}
-
-resource "google_service_account_key" "gateway_cloud_run" {
-  service_account_id = google_service_account.gateway_cloud_run.name
-  public_key_type    = "TYPE_X509_PEM_FILE"
-
-  keepers = {
-    rotation_time = time_rotating.gateway_cloud_run.rotation_rfc3339
-  }
-}
-
-resource "time_rotating" "gateway_cloud_run" {
-  rotation_days = 7
-}

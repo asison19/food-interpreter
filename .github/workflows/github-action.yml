@@ -82,7 +82,6 @@ jobs:
       interpreter_pubsub_topic_id: ${{ steps.terraform-output.outputs.interpreter_pubsub_topic_id }}
       interpreter_grpc_cloud_run_uri: ${{ steps.terraform-output.outputs.interpreter_grpc_cloud_run_uri }}
       gateway_cloud_run_uri: ${{ steps.terraform-output.outputs.gateway_cloud_run_uri }}
-      gateway_service_account_key: ${{ steps.terraform-output.outputs.gateway_service_account_key }}
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
