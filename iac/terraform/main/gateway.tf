@@ -3,6 +3,7 @@ resource "google_cloud_run_v2_service" "gateway" {
   location = var.GCP_PROJECT_REGION
   deletion_protection = false
 
+  # TODO, still without latest tag it will have a change in terraform plan on all runs.
   template {
     timeout = "10s"
     containers {
