@@ -72,7 +72,9 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 
 func (p *Parser) year() {
 	if p.accept(lexer.YEAR) {
-		p.semicolon() // TODO semicolon should be optional. At terminals there should be the error?
+		if p.expect(lexer.SEMICOLON) {
+			p.semicolon()
+		}
 		return
 	}
 	fmt.Printf("Year expected, got %v instead", p.Tokens[p.index])
