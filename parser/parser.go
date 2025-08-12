@@ -72,9 +72,7 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 
 func (p *Parser) year() {
 	if p.accept(lexer.YEAR) {
-		if p.expect(lexer.SEMICOLON) {
-			p.semicolon()
-		}
+		p.expect(lexer.SEMICOLON)
 		return
 	}
 	fmt.Printf("Year expected, got %v instead", p.Tokens[p.index])
@@ -102,6 +100,7 @@ func (p *Parser) time() {
 		fmt.Printf("Received time token and expected food, repeater, or sleep next.")
 		return
 	}
+	// TODO simplify by checking for any of the three, go to the next symbol (consume), and then expect comma or semicolon again?
 	switch token.Type {
 	case lexer.FOOD:
 		p.food()
@@ -174,7 +173,6 @@ func (p *Parser) comma() {
 }
 
 // TODO do I really need this to be a nonterminal?
-// TODO make it so that it's optional for the end of a line for MonthAndDay root or at least just Year.
 func (p *Parser) semicolon() {
 	p.accept(lexer.SEMICOLON)
 }
