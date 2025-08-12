@@ -66,7 +66,7 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	if p.accept(tokenType) {
 		return true
 	}
-	fmt.Printf("Error: unexpected symbol %v", tokenType)
+	fmt.Printf("Error: expected symbol %v", tokenType)
 	return false
 }
 
