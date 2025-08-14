@@ -125,7 +125,7 @@ func (p *Parser) food() {
 	case lexer.COMMA: // TODO rename comma nonterminal
 		p.comma()
 	case lexer.SEMICOLON: // TODO turn semicolon to a terminal?
-		p.semicolon()
+		p.accept(lexer.SEMICOLON)
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
@@ -142,7 +142,7 @@ func (p *Parser) repeater() {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
-		p.semicolon()
+		p.accept(lexer.SEMICOLON)
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
@@ -159,7 +159,7 @@ func (p *Parser) sleep() {
 	case lexer.COMMA:
 		p.comma()
 	case lexer.SEMICOLON:
-		p.semicolon()
+		p.accept(lexer.SEMICOLON)
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
@@ -170,9 +170,4 @@ func (p *Parser) sleep() {
 func (p *Parser) comma() {
 	p.expect(lexer.COMMA)
 	p.food()
-}
-
-// TODO do I really need this to be a nonterminal?
-func (p *Parser) semicolon() {
-	p.accept(lexer.SEMICOLON)
 }
