@@ -79,6 +79,8 @@ func (p *Parser) year() {
 	p.nextToken() // We're allowing a continue
 }
 
+// Returns the token and true if there exists another token
+// Returns an empty token and false if not
 func (p *Parser) check() (lexer.Token, bool) {
 	if len(p.Tokens) <= p.index {
 		return lexer.Token{}, true
@@ -172,7 +174,10 @@ func (p *Parser) comma() {
 	p.food()
 }
 
-// TODO do I really need this to be a nonterminal?
 func (p *Parser) semicolon() {
 	p.accept(lexer.SEMICOLON)
+	token, _ := p.check()
+	if token.Type == lexer.TIME {
+		p.time()
+	}
 }
