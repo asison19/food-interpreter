@@ -168,10 +168,24 @@ func (p *Parser) sleep() {
 	}
 }
 
-// TODO Update the language. After a comma could be a repeater, or sleep.
 func (p *Parser) comma() {
 	p.expect(lexer.COMMA)
-	p.food()
+	token, diary_err := p.check()
+	if diary_err {
+		fmt.Printf("Received comma token and expected food, repeater or sleep next.")
+		return
+	}
+	switch token.Type {
+	case lexer.FOOD:
+		p.food()
+	case lexer.REPEATER:
+		p.repeater()
+	case lexer.SLEEP:
+		p.sleep()
+	default:
+		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
+		p.nextToken()
+	}
 }
 
 func (p *Parser) semicolon() {
