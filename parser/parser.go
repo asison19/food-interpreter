@@ -189,7 +189,7 @@ func (p *Parser) comma() {
 }
 
 func (p *Parser) semicolon() {
-	p.accept(lexer.SEMICOLON)
+	p.expect(lexer.SEMICOLON)
 	token, _ := p.check()
 	if token.Type == lexer.TIME {
 		p.time()
