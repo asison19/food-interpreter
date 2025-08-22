@@ -124,9 +124,9 @@ func (p *Parser) food() {
 		return
 	}
 	switch token.Type {
-	case lexer.COMMA: // TODO rename comma nonterminal
+	case lexer.COMMA:
 		p.comma()
-	case lexer.SEMICOLON: // TODO turn semicolon to a terminal?
+	case lexer.SEMICOLON:
 		p.semicolon()
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
