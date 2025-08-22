@@ -171,7 +171,7 @@ func (l *Lexer) year() Token {
 func (l *Lexer) identifier() Token {
 	ahead := l.lookahead(1)
 
-	for isAlphaNumeric(ahead) {
+	for isAlphaNumeric(ahead) || regexp.MustCompile(`\s+`).MatchString(ahead) {
 		l.advance()
 		ahead = l.lookahead(1)
 	}
@@ -195,7 +195,8 @@ func (l *Lexer) identifier() Token {
 
 // E.g. 0/0, 1/32, etc.
 // Certain times are not possible:
-//   0000 - 2359 only
+//
+//	0000 - 2359 only
 func (l *Lexer) number() Token {
 	ahead := l.lookahead(1)
 
