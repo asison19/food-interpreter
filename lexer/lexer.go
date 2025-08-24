@@ -132,7 +132,7 @@ func (l *Lexer) clearLine() {
 
 func (l *Lexer) lookahead(amount int) string {
 	if l.position+amount > len(l.line) {
-		return "\n" // TODO return empty string?
+		return ""
 	}
 	return l.line[l.position : l.position+amount]
 }
