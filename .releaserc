@@ -1,5 +1,5 @@
 {
-  "branches": ["master"],
+  "branches": ["master", "api-test2"],
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
