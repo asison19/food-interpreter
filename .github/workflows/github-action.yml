@@ -191,14 +191,23 @@ jobs:
     steps:
       - name: Setup Github Actions checkout
         uses: actions/checkout@v4.2.2
+      - name: Setup Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: id_token
+          workload_identity_provider: 'projects/${{ vars.GCP_WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ vars.POOL_ID }}/providers/${{ vars.PROVIDER_ID }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}'
+          id_token_audience: '${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}'
       - name: Test gRPC endpoint
         env:
           gateway_uri: ${{ needs.terraform-apply.outputs.gateway_cloud_run_uri }}
+          id_token: ${{ steps.auth.outputs.id_token }}
         run: |
           echo '${{ secrets.API_TESTING_SERVICE_ACCOUNT_KEY }}' > sa.json
           gcloud auth activate-service-account ${{ secrets.API_TESTING_SERVICE_ACCOUNT }} --key-file=sa.json --project=${{ vars.GCP_PROJECT_ID }}
 
-          header="Authorization: bearer $(gcloud auth print-identity-token)"
+          header="Authorization: bearer $id_token"
           endpoint="$gateway_uri/interpret"
 
           response=$(curl -s -H "$header" -d '{"diary": "1/2 345 abc, def, ghi;"}' $endpoint)
