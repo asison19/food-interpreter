@@ -88,7 +88,6 @@ func (p *Parser) check() (lexer.Token, bool) {
 	return p.Tokens[p.index], false
 }
 
-// TODO index out of range for 01/23 last in token slice
 func (p *Parser) monthAndDay() {
 	p.expect(lexer.MONTHANDDAY)
 	p.time()
