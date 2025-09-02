@@ -24,11 +24,13 @@ func ParseTokens(tokens []lexer.Token) Parser {
 }
 
 func (p *Parser) parse() int {
+	var nodes []Node
 	for p.index < len(p.Tokens) {
 		token, _ := p.check()
 		switch token.Type {
 		case lexer.YEAR:
-			p.year()
+			nodes = append(nodes, p.year())
+			fmt.Println(nodes)
 		case lexer.MONTHANDDAY:
 			p.monthAndDay()
 		default:
@@ -70,13 +72,18 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	return false
 }
 
-func (p *Parser) year() {
+// TODO this stuff nees to move to nodes.go?
+func (p *Parser) year() Year {
 	if p.accept(lexer.YEAR) {
+		c := p.current
+		p.nextToken() // TODO this won't work for more than 1
+		year := Year{c, Semicolon.accept(Semicolon{}, p.current)}
 		p.expect(lexer.SEMICOLON)
-		return
+		return year
 	}
 	fmt.Printf("Year expected, got %v instead", p.Tokens[p.index])
 	p.nextToken() // We're allowing a continue
+	return Year{}
 }
 
 // Returns the token and true if there exists another token
