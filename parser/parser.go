@@ -30,7 +30,7 @@ func (p *Parser) parse() int {
 		switch token.Type {
 		case lexer.YEAR:
 			nodes = append(nodes, p.year())
-			fmt.Println(nodes)
+			fmt.Printf("%+v\n", nodes)
 		case lexer.MONTHANDDAY:
 			p.monthAndDay()
 		default:
@@ -43,6 +43,7 @@ func (p *Parser) parse() int {
 }
 
 // Go to the next token
+// TODO make this better
 func (p *Parser) nextToken() bool {
 	p.index++
 	if p.index < len(p.Tokens) {
@@ -74,16 +75,23 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 
 // TODO this stuff nees to move to nodes.go?
 func (p *Parser) year() Year {
-	if p.accept(lexer.YEAR) {
-		c := p.current
-		p.nextToken() // TODO this won't work for more than 1
-		year := Year{c, Semicolon.accept(Semicolon{}, p.current)}
-		p.expect(lexer.SEMICOLON)
-		return year
+	y := p.current // TODO there has to be a better way
+	if p.expect(lexer.YEAR) {
+		return Year{y, p.semicolon2()}
 	}
-	fmt.Printf("Year expected, got %v instead", p.Tokens[p.index])
-	p.nextToken() // We're allowing a continue
+	fmt.Printf("Error: expected year, got %v instead", p.current)
+
 	return Year{}
+}
+
+func (p *Parser) semicolon2() Semicolon {
+	s := p.current
+	if p.expect(lexer.SEMICOLON) {
+		return Semicolon{s}
+	}
+	fmt.Printf("Error: expected semicolon, got %v instead", p.current)
+
+	return Semicolon{}
 }
 
 // Returns the token and true if there exists another token
