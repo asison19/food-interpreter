@@ -73,7 +73,6 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	return false
 }
 
-// TODO this stuff nees to move to nodes.go?
 func (p *Parser) year() Year {
 	y := p.current // TODO there has to be a better way
 	if p.expect(lexer.YEAR) {
