@@ -13,6 +13,7 @@ type Year struct {
 
 type Semicolon struct {
 	semicolon lexer.Token
+	time      Time
 }
 
 type MonthAndDay struct {

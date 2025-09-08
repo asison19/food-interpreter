@@ -23,6 +23,7 @@ func ParseTokens(tokens []lexer.Token) Parser {
 	return parser // TODO what exactly should be returned? Create AST nodes and return them on each function, then return the root (need to make a complete root?) here?
 }
 
+// TODO clean outputs
 func (p *Parser) parse() int {
 	var nodes []Node
 	for p.index < len(p.Tokens) {
@@ -32,7 +33,7 @@ func (p *Parser) parse() int {
 			nodes = append(nodes, p.year())
 			fmt.Printf("%+v\n", nodes)
 		case lexer.MONTHANDDAY:
-			p.monthAndDay()
+			nodes = append(nodes, p.monthAndDay())
 		default:
 			fmt.Printf("Year or MonthAndDay expected, got %v instead", token.Type)
 			p.nextToken() // We're allowing a continue
@@ -75,22 +76,8 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 
 func (p *Parser) year() Year {
 	y := p.current // TODO there has to be a better way
-	if p.expect(lexer.YEAR) {
-		return Year{y, p.semicolon2()}
-	}
-	fmt.Printf("Error: expected year, got %v instead", p.current)
-
-	return Year{}
-}
-
-func (p *Parser) semicolon2() Semicolon {
-	s := p.current
-	if p.expect(lexer.SEMICOLON) {
-		return Semicolon{s}
-	}
-	fmt.Printf("Error: expected semicolon, got %v instead", p.current)
-
-	return Semicolon{}
+	p.expect(lexer.YEAR)
+	return Year{y, p.semicolon()}
 }
 
 // Returns the token and true if there exists another token
@@ -102,109 +89,124 @@ func (p *Parser) check() (lexer.Token, bool) {
 	return p.Tokens[p.index], false
 }
 
-func (p *Parser) monthAndDay() {
+func (p *Parser) monthAndDay() MonthAndDay {
+	mad := p.current
 	p.expect(lexer.MONTHANDDAY)
-	p.time()
+	return MonthAndDay{mad, p.time()}
 }
 
-func (p *Parser) time() {
-	p.expect(lexer.TIME)
+func (p *Parser) time() Time {
+	t := p.current
+	if !p.expect(lexer.TIME) {
+		fmt.Printf("Error: expected time, got %v instead.", p.current)
+	}
 
 	token, diary_err := p.check()
 	if diary_err {
 		fmt.Printf("Received time token and expected food, repeater, or sleep next.")
-		return
+		return Time{}
 	}
 	// TODO simplify by checking for any of the three, go to the next symbol (consume), and then expect comma or semicolon again?
 	switch token.Type {
 	case lexer.FOOD:
-		p.food()
+		return Time{t, p.food()}
 	case lexer.REPEATER:
-		p.repeater()
+		return Time{t, p.repeater()}
 	case lexer.SLEEP:
-		p.sleep()
+		return Time{t, p.sleep()}
 	default:
 		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
 		p.nextToken()
 	}
+	return Time{}
 
 }
-func (p *Parser) food() {
+func (p *Parser) food() Food {
+	f := p.current
 	p.expect(lexer.FOOD)
 	token, diary_err := p.check()
 	if diary_err {
 		fmt.Printf("Received food token and expected comma or semicolon next.")
-		return
+		return Food{}
 	}
 	switch token.Type {
 	case lexer.COMMA:
-		p.comma()
+		return Food{f, p.comma()}
 	case lexer.SEMICOLON:
-		p.semicolon()
+		return Food{f, p.semicolon()}
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
+		return Food{}
 	}
 }
-func (p *Parser) repeater() {
+func (p *Parser) repeater() Repeater {
+	r := p.current
 	p.expect(lexer.REPEATER)
 	token, diary_err := p.check()
 	if diary_err {
 		fmt.Printf("Received repeater token and expected comma or semicolon next.")
-		return
+		return Repeater{}
 	}
 	switch token.Type {
 	case lexer.COMMA:
-		p.comma()
+		return Repeater{r, p.comma()}
 	case lexer.SEMICOLON:
-		p.semicolon()
+		return Repeater{r, p.semicolon()}
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
+		return Repeater{}
 	}
 }
-func (p *Parser) sleep() {
+func (p *Parser) sleep() Sleep {
+	s := p.current
 	p.expect(lexer.SLEEP)
 	token, diary_err := p.check()
 	if diary_err {
 		fmt.Printf("Received sleep token and expected comma or semicolon next.")
-		return
+		return Sleep{}
 	}
 	switch token.Type {
 	case lexer.COMMA:
-		p.comma()
+		return Sleep{s, p.comma()}
 	case lexer.SEMICOLON:
-		p.semicolon()
+		return Sleep{s, p.semicolon()}
 	default:
 		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
 		p.nextToken()
+		return Sleep{}
 	}
 }
 
-func (p *Parser) comma() {
+func (p *Parser) comma() Comma {
+	c := p.current
 	p.expect(lexer.COMMA)
 	token, diary_err := p.check()
 	if diary_err {
 		fmt.Printf("Received comma token and expected food, repeater or sleep next.")
-		return
+		return Comma{}
 	}
 	switch token.Type {
 	case lexer.FOOD:
-		p.food()
-	case lexer.REPEATER:
-		p.repeater()
-	case lexer.SLEEP:
-		p.sleep()
+		return Comma{c, p.food()}
+	//case lexer.REPEATER: // TODO after comma has to come a food, revisit this?
+	//	return Comma{c, p.repeater()}
+	//case lexer.SLEEP:
+	//	return Comma{c, p.sleep()}
 	default:
 		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
 		p.nextToken()
+		return Comma{}
 	}
 }
 
-func (p *Parser) semicolon() {
+func (p *Parser) semicolon() Semicolon {
+	s := p.current
 	p.expect(lexer.SEMICOLON)
 	token, _ := p.check()
 	if token.Type == lexer.TIME {
-		p.time()
+		return Semicolon{s, p.time()}
 	}
+	return Semicolon{s, Time{}}
 }
