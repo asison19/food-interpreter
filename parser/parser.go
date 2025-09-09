@@ -23,8 +23,8 @@ func ParseTokens(tokens []lexer.Token) Parser {
 	return parser // TODO what exactly should be returned? Create AST nodes and return them on each function, then return the root (need to make a complete root?) here?
 }
 
-// TODO clean outputs
-func (p *Parser) parse() int {
+// TODO return errors as well
+func (p *Parser) parse() []Node {
 	var nodes []Node
 	for p.index < len(p.Tokens) {
 		token, _ := p.check()
@@ -34,13 +34,14 @@ func (p *Parser) parse() int {
 			fmt.Printf("%+v\n", nodes)
 		case lexer.MONTHANDDAY:
 			nodes = append(nodes, p.monthAndDay())
+			fmt.Printf("%+v\n", nodes)
 		default:
 			fmt.Printf("Year or MonthAndDay expected, got %v instead", token.Type)
 			p.nextToken() // We're allowing a continue
 		}
 		fmt.Println()
 	}
-	return 0
+	return nodes
 }
 
 // Go to the next token
@@ -57,7 +58,6 @@ func (p *Parser) nextToken() bool {
 // Accept the current token if it's the same as the passed in token.
 func (p *Parser) accept(tokenType lexer.TokenType) bool {
 	if p.current.Type == tokenType {
-		fmt.Printf("%v accepted", p.current.Type)
 		p.nextToken()
 		return true
 	}
