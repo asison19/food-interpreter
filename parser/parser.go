@@ -18,7 +18,8 @@ type Parser struct {
 func ParseTokens(tokens []lexer.Token) Parser {
 	parser := Parser{tokens, tokens[0], 0}
 
-	parser.parse()
+	nodes := parser.parse()
+	fmt.Printf("%+v\n", nodes)
 
 	return parser // TODO what exactly should be returned? Create AST nodes and return them on each function, then return the root (need to make a complete root?) here?
 }
@@ -31,10 +32,8 @@ func (p *Parser) parse() []Node {
 		switch token.Type {
 		case lexer.YEAR:
 			nodes = append(nodes, p.year())
-			fmt.Printf("%+v\n", nodes)
 		case lexer.MONTHANDDAY:
 			nodes = append(nodes, p.monthAndDay())
-			fmt.Printf("%+v\n", nodes)
 		default:
 			fmt.Printf("Year or MonthAndDay expected, got %v instead", token.Type)
 			p.nextToken() // We're allowing a continue
