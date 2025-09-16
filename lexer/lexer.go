@@ -73,7 +73,7 @@ L:
 		case " ", "\n", "\r": // ignorables
 			lexer.clearLexeme()
 			continue L
-		case "y": // YEAR
+		case "y": // YEAR // TODO foods that start with y aren't years.
 			lexer.addToken(lexer.year())
 			continue L
 		case ";": // SEMICOLON
