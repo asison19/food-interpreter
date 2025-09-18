@@ -33,6 +33,8 @@ docker run -it -p 8080:8080 food-interpreter
 You can now run it by hitting the gateway endpoint like this,
 ```bash
 curl -d '{"diary": "1/2 345 abc, def, ghi;"}' http://localhost:8081/interpret
+# or
+curl -i -H "Content-Type: application/json" -X POST http://localhost:8081/interpret --data-binary @test/data/test.json
 ```
 Which will produce the output,
 ```json
