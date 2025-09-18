@@ -15,13 +15,12 @@ type Parser struct {
 // TODO newline seperation? Lexer needs to deal with it if so?
 // TODO lexer.Token, is there a better way of doing this?
 
-func ParseTokens(tokens []lexer.Token) Parser {
+func ParseTokens(tokens []lexer.Token) (Parser, []Node) {
 	parser := Parser{tokens, tokens[0], 0}
 
 	nodes := parser.parse()
-	fmt.Printf("%+v\n", nodes)
 
-	return parser // TODO what exactly should be returned? Create AST nodes and return them on each function, then return the root (need to make a complete root?) here?
+	return parser, nodes
 }
 
 // TODO return errors as well

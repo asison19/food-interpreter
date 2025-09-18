@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"food-interpreter/generator"
 	"food-interpreter/lexer"
 	"food-interpreter/parser"
 )
@@ -9,7 +10,8 @@ import (
 func Interpret(diary string) parser.Parser {
 
 	l := lexer.LexString(diary)
-	p := parser.ParseTokens(l.Tokens)
+	p, nodes := parser.ParseTokens(l.Tokens)
+	generator.Generate(nodes)
 
 	return p
 }

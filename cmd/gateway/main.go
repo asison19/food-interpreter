@@ -152,6 +152,7 @@ func interpretRequestWithAuth(conn *grpc.ClientConn, p *pb.DiaryRequest, audienc
 	return c.Interpret(ctx, p)
 }
 
+// TODO New endpoint for sending files instead
 func interpretHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flag.Parse()
