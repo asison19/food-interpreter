@@ -8,6 +8,7 @@ import (
 	"food-interpreter/parser"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -25,16 +26,21 @@ type currentDate struct {
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
 func Generate(nodes []parser.Node) {
 	fmt.Printf("Nodes: %+v\n", nodes)
+	currentDate := currentDate{0, 0, 0}
+
 	for _, node := range nodes {
 
 		// TODO switch?
-		if yearNode, ok := node.(parser.Year); ok {
-			fmt.Println("YEAR node")
-			year := handleYear(yearNode)
-			fmt.Printf("The working year is %d\n", year)
+		if node, ok := node.(parser.Year); ok {
+			currentDate.year = handleYear(node)
+			fmt.Printf("The current working year is %d\n", currentDate.year)
 		}
 
 		// TODO, the rest of the tokens
+		if node, ok := node.(parser.MonthAndDay); ok {
+			currentDate.month, currentDate.day = handleMonthAndDay(node)
+			fmt.Printf("The current working month and day is %d/%d\n", currentDate.month, currentDate.day)
+		}
 
 		// In the case of semicolon, do nothing
 
@@ -43,11 +49,11 @@ func Generate(nodes []parser.Node) {
 }
 
 // Given a year node, return the int value of the year.
-func handleYear(yearNode parser.Year) int {
-	token := yearNode.GetToken()
+func handleYear(node parser.Year) int {
+	token := node.GetToken()
 	number, err := strconv.Atoi(trimFirstRune(token.Lexeme))
 	if err != nil {
-		log.Fatal("Year token is not an int: " + token.Lexeme)
+		log.Fatal("Invalid Year token: " + token.Lexeme)
 	}
 
 	return number
@@ -58,4 +64,26 @@ func trimFirstRune(s string) string {
 	_, i := utf8.DecodeRuneInString(s)
 	fmt.Println(i)
 	return s[i:]
+}
+
+func handleMonthAndDay(node parser.MonthAndDay) (time.Month, int) {
+	mad := node.GetToken().Lexeme
+	madSli := strings.Split(mad, "/")
+
+	if len(madSli) != 2 {
+		log.Fatal("Invalid Month and Day token: " + mad)
+	}
+
+	m, err := strconv.Atoi(madSli[0])
+	if err != nil {
+		log.Fatal("Invalid Month token: " + mad)
+	}
+
+	d, err := strconv.Atoi(madSli[1])
+	if err != nil {
+		log.Fatal("Invalid Day token: " + mad)
+	}
+
+	return time.Month(m), d
+
 }
