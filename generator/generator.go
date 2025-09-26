@@ -25,7 +25,6 @@ type currentDate struct {
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
 func Generate(nodes []parser.Node) {
-	fmt.Printf("Nodes: %+v\n", nodes)
 	currentDate := currentDate{0, 0, 0}
 
 	for _, node := range nodes {
@@ -36,13 +35,20 @@ func Generate(nodes []parser.Node) {
 			fmt.Printf("The current working year is %d\n", currentDate.year)
 		}
 
-		// TODO, the rest of the tokens
 		if node, ok := node.(parser.MonthAndDay); ok {
 			currentDate.month, currentDate.day = handleMonthAndDay(node)
 			fmt.Printf("The current working month and day is %d/%d\n", currentDate.month, currentDate.day)
-		}
 
-		// In the case of semicolon, do nothing
+			// Get the times and foods
+			subNodes := node.GetSubNodes()
+			for _, subNode := range subNodes {
+				if timeNode, ok := subNode.(parser.Time); ok {
+					time := handleTime(timeNode)
+					fmt.Printf("Time is %d\n", time)
+				}
+
+			}
+		}
 
 		fmt.Println(node)
 	}
@@ -86,4 +92,38 @@ func handleMonthAndDay(node parser.MonthAndDay) (time.Month, int) {
 
 	return time.Month(m), d
 
+}
+
+// Each time should have some food, repeater, or sleep tied to it, or even multiple
+func handleTime(node parser.Time) int {
+
+	// Get the time
+	timeStr := node.GetToken().Lexeme
+	time, err := strconv.Atoi(timeStr)
+	if err != nil {
+		log.Fatal("Invalid time: " + timeStr)
+	}
+
+	list := handleSubNodes([]string{}, node.GetSubNodes())
+	fmt.Printf("The FRS of time %d, is %s ", time, list)
+	return time
+}
+
+func handleSubNodes(list []string, nodes []parser.Node) []string {
+	for _, node := range nodes {
+		if node == nil {
+			return list
+		}
+
+		_, ok1 := node.(parser.Food)
+		_, ok2 := node.(parser.Sleep)
+		_, ok3 := node.(parser.Repeater)
+
+		if ok1 || ok2 || ok3 {
+			list = append(list, node.GetToken().Lexeme)
+		}
+
+		return handleSubNodes(list, node.GetSubNodes())
+	}
+	return list
 }
