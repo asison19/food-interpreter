@@ -23,9 +23,15 @@ type currentDate struct {
 	day   int
 }
 
+type diaryEntry struct {
+	date time.Time
+	list []string
+}
+
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
 func Generate(nodes []parser.Node) {
 	currentDate := currentDate{0, 0, 0}
+	diaryEntries := []diaryEntry{}
 
 	for _, node := range nodes {
 
@@ -43,15 +49,19 @@ func Generate(nodes []parser.Node) {
 			subNodes := node.GetSubNodes()
 			for _, subNode := range subNodes {
 				if timeNode, ok := subNode.(parser.Time); ok {
-					time := handleTime(timeNode)
-					fmt.Printf("Time is %d\n", time)
+					hourmin, list := handleTime(timeNode)
+					hour := int(hourmin / 100)
+					min := int(hourmin % 100)
+					entry := diaryEntry{time.Date(currentDate.year, currentDate.month, currentDate.day, hour, min, 0, 0, &timezone), list}
+					diaryEntries = append(diaryEntries, entry)
+					fmt.Printf("Time is %d\n", hourmin)
+					fmt.Printf("The diary entry is %v\n", entry)
 				}
-
 			}
 		}
-
 		fmt.Println(node)
 	}
+	fmt.Printf("The diary entries are %v\n", diaryEntries)
 }
 
 // Given a year node, return the int value of the year.
@@ -89,13 +99,12 @@ func handleMonthAndDay(node parser.MonthAndDay) (time.Month, int) {
 	if err != nil {
 		log.Fatal("Invalid Day token: " + mad)
 	}
-
 	return time.Month(m), d
-
 }
 
 // Each time should have some food, repeater, or sleep tied to it, or even multiple
-func handleTime(node parser.Time) int {
+// Returns the time and list of items done at that time
+func handleTime(node parser.Time) (int, []string) {
 
 	// Get the time
 	timeStr := node.GetToken().Lexeme
@@ -106,7 +115,8 @@ func handleTime(node parser.Time) int {
 
 	list := handleSubNodes([]string{}, node.GetSubNodes())
 	fmt.Printf("The FRS of time %d, is %s ", time, list)
-	return time
+
+	return time, list
 }
 
 func handleSubNodes(list []string, nodes []parser.Node) []string {
