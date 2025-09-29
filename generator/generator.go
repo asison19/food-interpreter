@@ -23,15 +23,15 @@ type currentDate struct {
 	day   int
 }
 
-type diaryEntry struct {
-	date time.Time
-	list []string
+type DiaryEntry struct {
+	Date time.Time
+	List []string
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
-func Generate(nodes []parser.Node) {
+func Generate(nodes []parser.Node) []DiaryEntry {
 	currentDate := currentDate{0, 0, 0}
-	diaryEntries := []diaryEntry{}
+	diaryEntries := []DiaryEntry{}
 
 	for _, node := range nodes {
 
@@ -52,7 +52,7 @@ func Generate(nodes []parser.Node) {
 					hourmin, list := handleTime(timeNode)
 					hour := int(hourmin / 100)
 					min := int(hourmin % 100)
-					entry := diaryEntry{time.Date(currentDate.year, currentDate.month, currentDate.day, hour, min, 0, 0, &timezone), list}
+					entry := DiaryEntry{time.Date(currentDate.year, currentDate.month, currentDate.day, hour, min, 0, 0, &timezone), list}
 					diaryEntries = append(diaryEntries, entry)
 					fmt.Printf("Time is %d\n", hourmin)
 					fmt.Printf("The diary entry is %v\n", entry)
@@ -61,7 +61,7 @@ func Generate(nodes []parser.Node) {
 		}
 		fmt.Println(node)
 	}
-	fmt.Printf("The diary entries are %v\n", diaryEntries)
+	return diaryEntries
 }
 
 // Given a year node, return the int value of the year.
