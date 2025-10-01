@@ -1,13 +1,14 @@
 import pandas as pd
 from argparse import ArgumentParser
+from ast import literal_eval
 
 def display_entries(f):
     print(f)
     df = pd.read_csv(f)
 
+    df.iloc[:, 1] = df.iloc[:, 1].apply(literal_eval)
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(df)
-
 
 if __name__ == "__main__":
     print("hello")
