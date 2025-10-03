@@ -35,9 +35,9 @@ func writeToFile(entries []generator.DiaryEntry) {
 	f, err := os.Create("diaryc-" + now.Format("20060102-150405"))
 	check(err)
 
-	f.WriteString("Time, Food\n")
+	f.WriteString("datetime,food\n")
 	for _, e := range entries {
-		f.WriteString(e.Date.String() + ",\"['" + strings.Join(e.List, "','") + "']\"\n")
+		f.WriteString(e.Date.Format(time.RFC3339) + ",\"['" + strings.Join(e.List, "','") + "']\"\n")
 	}
 
 	defer f.Close()
