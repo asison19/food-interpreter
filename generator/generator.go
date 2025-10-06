@@ -23,27 +23,43 @@ type currentDate struct {
 	day   int
 }
 
-type DiaryEntry struct {
-	Date time.Time
-	List []string
+//type DiaryEntry struct {
+//	Date time.Time
+//	List []string
+//}
+
+type entry interface {
+}
+
+// TODO the rest
+type foodEntry struct {
+	name     string
+	calories int // TODO The rest of the pertinent nutritional data and then comments in the future
+}
+
+type sleepEntry struct {
+	// TODO sleep hygiene?
+}
+
+type repeaterEntry struct {
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
-func Generate(nodes []parser.Node) []DiaryEntry {
+func Generate(nodes []parser.Node) map[time.Time][]entry {
 	currentDate := currentDate{0, 0, 0}
-	diaryEntries := []DiaryEntry{}
 
+	m := make(map[time.Time][]entry)
 	for _, node := range nodes {
 
-		// TODO switch?
+		// Get the year
 		if node, ok := node.(parser.Year); ok {
 			currentDate.year = handleYear(node)
 			fmt.Printf("The current working year is %d\n", currentDate.year)
 		}
 
+		// Get the month and day along with the times and foods
 		if node, ok := node.(parser.MonthAndDay); ok {
 			currentDate.month, currentDate.day = handleMonthAndDay(node)
-			fmt.Printf("The current working month and day is %d/%d\n", currentDate.month, currentDate.day)
 
 			// Get the times and foods
 			subNodes := node.GetSubNodes()
@@ -52,16 +68,26 @@ func Generate(nodes []parser.Node) []DiaryEntry {
 					hourmin, list := handleTime(timeNode)
 					hour := int(hourmin / 100)
 					min := int(hourmin % 100)
-					entry := DiaryEntry{time.Date(currentDate.year, currentDate.month, currentDate.day, hour, min, 0, 0, &timezone), list}
-					diaryEntries = append(diaryEntries, entry)
-					fmt.Printf("Time is %d\n", hourmin)
-					fmt.Printf("The diary entry is %v\n", entry)
+					time := time.Date(currentDate.year, currentDate.month, currentDate.day, hour, min, 0, 0, &timezone)
+					//diaryEntries = append(diaryEntries, entry)
+					m[time] = list
 				}
 			}
 		}
 		fmt.Println(node)
 	}
-	return diaryEntries
+	return m
+}
+
+func addFoodData(m map[time.Time][]entry) {
+	//for _, v := range m {
+
+	//}
+
+}
+
+func getFoodEntries() {
+
 }
 
 // Given a year node, return the int value of the year.
@@ -103,8 +129,8 @@ func handleMonthAndDay(node parser.MonthAndDay) (time.Month, int) {
 }
 
 // Each time should have some food, repeater, or sleep tied to it, or even multiple
-// Returns the time and list of items done at that time
-func handleTime(node parser.Time) (int, []string) {
+// Returns the time and list of entries done at that time
+func handleTime(node parser.Time) (int, []entry) {
 
 	// Get the time
 	timeStr := node.GetToken().Lexeme
@@ -113,24 +139,28 @@ func handleTime(node parser.Time) (int, []string) {
 		log.Fatal("Invalid time: " + timeStr)
 	}
 
-	list := handleSubNodes([]string{}, node.GetSubNodes())
+	list := handleSubNodes([]entry{}, node.GetSubNodes())
 	fmt.Printf("The FRS of time %d, is %s ", time, list)
 
 	return time, list
 }
 
-func handleSubNodes(list []string, nodes []parser.Node) []string {
+func handleSubNodes(list []entry, nodes []parser.Node) []entry {
 	for _, node := range nodes {
 		if node == nil {
 			return list
 		}
 
-		_, ok1 := node.(parser.Food)
-		_, ok2 := node.(parser.Sleep)
-		_, ok3 := node.(parser.Repeater)
-
-		if ok1 || ok2 || ok3 {
-			list = append(list, node.GetToken().Lexeme)
+		// TODO at this point do the lexeme parsing for user inputted information?
+		if n, ok := node.(parser.Food); ok {
+			entry := foodEntry{n.GetToken().Lexeme, 0}
+			list = append(list, entry)
+		} else if _, ok := node.(parser.Sleep); ok {
+			entry := sleepEntry{}
+			list = append(list, entry)
+		} else if _, ok := node.(parser.Repeater); ok {
+			entry := repeaterEntry{}
+			list = append(list, entry)
 		}
 
 		return handleSubNodes(list, node.GetSubNodes())
