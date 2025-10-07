@@ -4,17 +4,23 @@ package generator
 // or create a csv (or just send the straight up diary/nodes? All the interpreter does it ensure proper grammar?) and send that?
 
 import (
+	"flag"
 	"fmt"
 	"food-interpreter/parser"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 )
 
-// TODO make this configurable
-var timezone time.Location = *time.Local
+var (
+	timezone       time.Location = *time.Local // TODO make this configurable
+	fdcnal_api_key               = flag.String("fdcnal", os.Getenv("FDCNAL_API_KEY"), "The USDA Food Data Central API key.")
+)
 
 // Current working date
 type currentDate struct {
@@ -39,9 +45,12 @@ type foodEntry struct {
 
 type sleepEntry struct {
 	// TODO sleep hygiene?
+	details string
 }
 
 type repeaterEntry struct {
+	// TODO this entry will potentially have a mix of stuff. Should deal with it before getting to here?
+	details string
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
@@ -54,7 +63,6 @@ func Generate(nodes []parser.Node) map[time.Time][]entry {
 		// Get the year
 		if node, ok := node.(parser.Year); ok {
 			currentDate.year = handleYear(node)
-			fmt.Printf("The current working year is %d\n", currentDate.year)
 		}
 
 		// Get the month and day along with the times and foods
@@ -74,20 +82,52 @@ func Generate(nodes []parser.Node) map[time.Time][]entry {
 				}
 			}
 		}
-		fmt.Println(node)
 	}
+	addFoodData(m)
 	return m
 }
 
+// m - hashmap of the times and entries
 func addFoodData(m map[time.Time][]entry) {
-	//for _, v := range m {
 
-	//}
+	// Get the food entries
+	set := make(map[string]struct{})
+	for _, v := range m {
+		for _, e := range v {
+			if f, ok := e.(foodEntry); ok {
+				set[f.name] = struct{}{}
+			}
+		}
+	}
 
+	// Get the nutritional data
+	flag.Parse()
+	query := appendString(set)
+	url := "https://api.nal.usda.gov/fdc/v1/foods/search?query=" + query + "&dataType=Branded&pageSize=25&pageNumber=2&sortBy=dataType.keyword&sortOrder=asc&api_key=" + *fdcnal_api_key
+	fmt.Println(url)
+
+	req, e := http.NewRequest("GET", url, nil)
+	check(e)
+	req.Header.Set("accept", "application/json")
+
+	client := &http.Client{}
+	resp, e := client.Do(req)
+	//resp, e := http.Get(url)
+	check(e)
+	defer resp.Body.Close()
+
+	body, e := io.ReadAll(resp.Body)
+	check(e)
+	fmt.Println(string(body))
 }
 
-func getFoodEntries() {
-
+// append the keys in the map to a string for use with a url
+func appendString(m map[string]struct{}) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return "%22" + strings.Join(keys, "%22%20%22") + "%22"
 }
 
 // Given a year node, return the int value of the year.
@@ -104,7 +144,6 @@ func handleYear(node parser.Year) int {
 // Send the result of removing the first element in the passed in string
 func trimFirstRune(s string) string {
 	_, i := utf8.DecodeRuneInString(s)
-	fmt.Println(i)
 	return s[i:]
 }
 
@@ -140,7 +179,6 @@ func handleTime(node parser.Time) (int, []entry) {
 	}
 
 	list := handleSubNodes([]entry{}, node.GetSubNodes())
-	fmt.Printf("The FRS of time %d, is %s ", time, list)
 
 	return time, list
 }
@@ -155,15 +193,21 @@ func handleSubNodes(list []entry, nodes []parser.Node) []entry {
 		if n, ok := node.(parser.Food); ok {
 			entry := foodEntry{n.GetToken().Lexeme, 0}
 			list = append(list, entry)
-		} else if _, ok := node.(parser.Sleep); ok {
-			entry := sleepEntry{}
+		} else if n, ok := node.(parser.Sleep); ok {
+			entry := sleepEntry{n.GetToken().Lexeme}
 			list = append(list, entry)
-		} else if _, ok := node.(parser.Repeater); ok {
-			entry := repeaterEntry{}
+		} else if n, ok := node.(parser.Repeater); ok {
+			entry := repeaterEntry{n.GetToken().Lexeme}
 			list = append(list, entry)
 		}
 
 		return handleSubNodes(list, node.GetSubNodes())
 	}
 	return list
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
