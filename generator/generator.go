@@ -4,6 +4,7 @@ package generator
 // or create a csv (or just send the straight up diary/nodes? All the interpreter does it ensure proper grammar?) and send that?
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"food-interpreter/parser"
@@ -51,6 +52,23 @@ type sleepEntry struct {
 type repeaterEntry struct {
 	// TODO this entry will potentially have a mix of stuff. Should deal with it before getting to here?
 	details string
+}
+
+// FDCNAL API JSON structs
+type FdcnalFoods struct {
+	Foods []FdcnalFood `json:"foods"`
+}
+
+type FdcnalFood struct {
+	FdcId         int                   `json:"fdcId"`
+	Description   string                `json:"description"`
+	ServingSize   float64               `json:"servingSize"`
+	FoodNutrients []FdcnalFoodNutrients `json:"foodNutrients"`
+}
+
+type FdcnalFoodNutrients struct {
+	NutrientId   int    `json:"nutrientId"`
+	NutrientName string `json:"nutrientName"`
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
@@ -104,7 +122,6 @@ func addFoodData(m map[time.Time][]entry) {
 	flag.Parse()
 	query := appendString(set)
 	url := "https://api.nal.usda.gov/fdc/v1/foods/search?query=" + query + "&dataType=Branded&pageSize=25&pageNumber=2&sortBy=dataType.keyword&sortOrder=asc&api_key=" + *fdcnal_api_key
-	fmt.Println(url)
 
 	req, e := http.NewRequest("GET", url, nil)
 	check(e)
@@ -112,13 +129,15 @@ func addFoodData(m map[time.Time][]entry) {
 
 	client := &http.Client{}
 	resp, e := client.Do(req)
-	//resp, e := http.Get(url)
 	check(e)
 	defer resp.Body.Close()
 
 	body, e := io.ReadAll(resp.Body)
 	check(e)
-	fmt.Println(string(body))
+
+	var result FdcnalFoods
+	json.Unmarshal(body, &result)
+	fmt.Println(result.Foods)
 }
 
 // append the keys in the map to a string for use with a url
