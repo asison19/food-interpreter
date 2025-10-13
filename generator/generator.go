@@ -10,6 +10,7 @@ import (
 	"food-interpreter/parser"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -162,13 +163,47 @@ func addFoodData(m map[time.Time][]entry) {
 // fdcnal - The FDCNAL API call result
 func findFood(f string, fdcnal Fdcnal) FdcnalFood {
 	// TODO fuzzy matching
+	d := math.MaxInt
+	r := FdcnalFood{}
 	for _, e := range fdcnal.Foods {
-		if f == e.Description {
-			return e
+		ld := levenshteinDistance(f, e.Description)
+		if ld < d {
+			d = ld
+			r = e
 		}
 		// TODO search brand information too
 	}
-	return FdcnalFood{}
+	return r
+}
+
+// TODO add some tests
+func levenshteinDistance(a string, b string) int {
+	n := len(a)
+	m := len(b)
+
+	p := make([]int, m+1)
+	c := make([]int, m+1)
+
+	for j := range m {
+		p[j] = j
+	}
+	for i := range n {
+		c[0] = i + 1
+
+		for j := range m {
+			sc := 0
+			if a[i] != b[j] {
+				sc = 1
+			}
+			c[j+1] = min(
+				p[j+1]+1, // deletion
+				c[j]+1,   // insertion
+				p[j]+sc,  // substitution
+			)
+		}
+		copy(p, c)
+	}
+	return p[m]
 }
 
 // append the keys in the map to a string for use with a url
