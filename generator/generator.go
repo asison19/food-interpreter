@@ -176,7 +176,6 @@ func findFood(f string, fdcnal Fdcnal) FdcnalFood {
 	return r
 }
 
-// TODO add some tests
 func levenshteinDistance(a string, b string) int {
 	n := len(a)
 	m := len(b)
