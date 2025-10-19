@@ -34,7 +34,7 @@ func (p *Parser) parse() []Node {
 		case lexer.MONTHANDDAY:
 			nodes = append(nodes, p.monthAndDay())
 		default:
-			fmt.Printf("Year or MonthAndDay expected, got %v instead", token.Type)
+			fmt.Printf("Year or MonthAndDay root node expected, got %v instead", token.Type)
 			p.nextToken() // We're allowing a continue
 		}
 		fmt.Println()
@@ -68,7 +68,7 @@ func (p *Parser) expect(tokenType lexer.TokenType) bool {
 	if p.accept(tokenType) {
 		return true
 	}
-	fmt.Printf("Error: expected symbol %v", tokenType)
+	fmt.Printf("Error: expected token %v", tokenType)
 	return false
 }
 
@@ -113,7 +113,7 @@ func (p *Parser) time() Time {
 	case lexer.SLEEP:
 		return Time{t, p.sleep()}
 	default:
-		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
+		fmt.Printf("Food, repeater, or sleep expected after time, got %v instead.", token.Type)
 		p.nextToken()
 	}
 	return Time{}
@@ -133,7 +133,7 @@ func (p *Parser) food() Food {
 	case lexer.SEMICOLON:
 		return Food{f, p.semicolon()}
 	default:
-		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
+		fmt.Printf("Comma or semicolon expected after food, got %v instead", token.Type)
 		p.nextToken()
 		return Food{}
 	}
@@ -152,7 +152,7 @@ func (p *Parser) repeater() Repeater {
 	case lexer.SEMICOLON:
 		return Repeater{r, p.semicolon()}
 	default:
-		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
+		fmt.Printf("Comma or semicolon expected after repeater, got %v instead", token.Type)
 		p.nextToken()
 		return Repeater{}
 	}
@@ -171,7 +171,7 @@ func (p *Parser) sleep() Sleep {
 	case lexer.SEMICOLON:
 		return Sleep{s, p.semicolon()}
 	default:
-		fmt.Printf("Comma or semicolon expected, got %v instead", token.Type)
+		fmt.Printf("Comma or semicolon expected after sleep , got %v instead", token.Type)
 		p.nextToken()
 		return Sleep{}
 	}
@@ -193,7 +193,7 @@ func (p *Parser) comma() Comma {
 	case lexer.SLEEP:
 		return Comma{c, p.sleep()}
 	default:
-		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
+		fmt.Printf("Food, repeater, or sleep expected after comma, got %v instead.", token.Type)
 		p.nextToken()
 		return Comma{}
 	}
