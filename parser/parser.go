@@ -188,10 +188,10 @@ func (p *Parser) comma() Comma {
 	switch token.Type {
 	case lexer.FOOD:
 		return Comma{c, p.food()}
-	//case lexer.REPEATER: // TODO after comma has to come a food, revisit this?
-	//	return Comma{c, p.repeater()}
-	//case lexer.SLEEP:
-	//	return Comma{c, p.sleep()}
+	case lexer.REPEATER:
+		return Comma{c, p.repeater()}
+	case lexer.SLEEP:
+		return Comma{c, p.sleep()}
 	default:
 		fmt.Printf("Food, repeater, or sleep expected, got %v instead", token.Type)
 		p.nextToken()

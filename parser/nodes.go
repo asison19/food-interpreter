@@ -76,7 +76,7 @@ func (f Food) GetSubNodes() []Node {
 
 type Comma struct {
 	comma lexer.Token
-	food  Food
+	right Node
 }
 
 func (c Comma) GetToken() lexer.Token {
@@ -84,7 +84,7 @@ func (c Comma) GetToken() lexer.Token {
 }
 
 func (c Comma) GetSubNodes() []Node {
-	return []Node{c.food}
+	return []Node{c.right}
 }
 
 type Repeater struct {
