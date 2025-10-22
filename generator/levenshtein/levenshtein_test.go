@@ -1,4 +1,4 @@
-package fdcnal
+package levenshtein
 
 import (
 	"testing"
@@ -28,7 +28,7 @@ func TestLevenshteinDistance(t *testing.T) {
 	}
 
 	for _, e := range l {
-		r := levenshteinDistance(e.a, e.b)
+		r := LevenshteinDistance(e.a, e.b)
 		if r != e.n {
 			t.Fatalf("Expected Levenshtein Distance of %d for \"%s\" and \"%s\". Got %d instead.", e.n, e.a, e.b, r)
 		}

@@ -13,8 +13,8 @@ jobs:
           cache: true
       - name: Run Lexer tests
         run: cd lexer && go test -v
-      - name: Run Generator tests
-        run: cd generator && go test -v
+      - name: Run Levenshtein Distance tests
+        run: cd generator/levenshtein && go test -v
   generate-release:
     needs: run-tests
     runs-on: ubuntu-latest

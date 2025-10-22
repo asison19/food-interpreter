@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"food-interpreter/generator/levenshtein"
 	"io"
 	"math"
 	"net/http"
@@ -32,7 +33,8 @@ type FdcnalFoodNutrients struct {
 	NutrientName string `json:"nutrientName"`
 }
 
-// m - hashmap of the times and entries
+// m - set of the foods to search for
+// Returns a list of foods from the FDCNAL API that closely match the foods from the given set, m
 func GetFoodData(set map[string]struct{}) []FdcnalFood {
 
 	// Get the nutritional data
@@ -59,13 +61,12 @@ func GetFoodData(set map[string]struct{}) []FdcnalFood {
 
 	var fdcnal Fdcnal
 	json.Unmarshal(body, &fdcnal)
-	//fmt.Println(fdcnal.Foods)
 
 	for _, f := range fdcnal.Foods {
 		fmt.Println(f.Description)
 	}
 
-	// Find the food that most matches
+	// Find the foods that most matches the entries.
 	var foods []FdcnalFood
 	for k := range set {
 		foods = append(foods, findFood(k, fdcnal))
@@ -82,7 +83,7 @@ func findFood(f string, fdcnal Fdcnal) FdcnalFood {
 	d := math.MaxInt
 	r := FdcnalFood{}
 	for _, e := range fdcnal.Foods {
-		ld := levenshteinDistance(f, e.Description)
+		ld := levenshtein.LevenshteinDistance(f, e.Description)
 		if ld < d {
 			d = ld
 			r = e
@@ -90,35 +91,6 @@ func findFood(f string, fdcnal Fdcnal) FdcnalFood {
 		// TODO search brand information too
 	}
 	return r
-}
-
-func levenshteinDistance(a string, b string) int {
-	n := len(a)
-	m := len(b)
-
-	p := make([]int, m+1)
-	c := make([]int, m+1)
-
-	for j := range m {
-		p[j] = j
-	}
-	for i := range n {
-		c[0] = i + 1
-
-		for j := range m {
-			sc := 0
-			if a[i] != b[j] {
-				sc = 1
-			}
-			c[j+1] = min(
-				p[j+1]+1, // deletion
-				c[j]+1,   // insertion
-				p[j]+sc,  // substitution
-			)
-		}
-		copy(p, c)
-	}
-	return p[m]
 }
 
 // append the keys in the map to a string for use with a url
