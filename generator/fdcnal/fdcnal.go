@@ -3,7 +3,6 @@ package fdcnal
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"food-interpreter/generator/levenshtein"
 	"io"
 	"math"
@@ -62,14 +61,10 @@ func GetFoodData(set map[string]struct{}) []FdcnalFood {
 	var fdcnal Fdcnal
 	json.Unmarshal(body, &fdcnal)
 
-	for _, f := range fdcnal.Foods {
-		fmt.Println(f.Description)
-	}
-
 	// Find the foods that most matches the entries.
 	var foods []FdcnalFood
 	for k := range set {
-		foods = append(foods, findFood(k, fdcnal))
+		foods = append(foods, findFood(k, fdcnal.Foods))
 	}
 	return foods
 }
@@ -77,13 +72,13 @@ func GetFoodData(set map[string]struct{}) []FdcnalFood {
 // Find the food that most matches
 //
 // f - Food to match
-// fdcnal - The FDCNAL API call result
-func findFood(f string, fdcnal Fdcnal) FdcnalFood {
-	// TODO fuzzy matching
+// foods - The FDCNAL foods to compare with
+func findFood(f string, foods []FdcnalFood) FdcnalFood {
 	d := math.MaxInt
 	r := FdcnalFood{}
-	for _, e := range fdcnal.Foods {
-		ld := levenshtein.LevenshteinDistance(f, e.Description)
+	for _, e := range foods {
+		ef := strings.SplitN(e.Description, ",", 2)[0] // The food is at the first part, the rest are descriptors. TODO check more foods.
+		ld := levenshtein.LevenshteinDistance(strings.ToLower(f), strings.ToLower(ef))
 		if ld < d {
 			d = ld
 			r = e
