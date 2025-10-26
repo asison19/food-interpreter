@@ -4,7 +4,6 @@ package generator
 // or create a csv (or just send the straight up diary/nodes? All the interpreter does it ensure proper grammar?) and send that?
 
 import (
-	"fmt"
 	"food-interpreter/generator/fdcnal"
 	"food-interpreter/parser"
 	"log"
@@ -47,21 +46,17 @@ type repeaterEntry struct {
 // m - Map of date times and their entries of food, sleep, or repeater.
 func addFoodData(m map[time.Time][]entry) {
 
-	// Get the food entries as just strings
-	set := make(map[string]struct{})
+	// Map for the foods from the diary and it's most matching food from the FDCNAL DB.
+	foods := make(map[string]fdcnal.FdcnalFood)
 	for _, v := range m {
 		for _, e := range v {
 			if f, ok := e.(foodEntry); ok {
-				set[f.name] = struct{}{}
+				foods[f.name] = fdcnal.FdcnalFood{}
 			}
 		}
 	}
 
-	foods := fdcnal.GetFoodData(set)
-
-	for _, f := range foods {
-		fmt.Println(f.Description)
-	}
+	fdcnal.SetFoodData(foods)
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)

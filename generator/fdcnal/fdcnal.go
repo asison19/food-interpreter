@@ -32,13 +32,14 @@ type FdcnalFoodNutrients struct {
 	NutrientName string `json:"nutrientName"`
 }
 
-// m - set of the foods to search for
+// m - map of the foods to search for and add FdcnalFood to
+// Modifies m, adding matching FdcnalFood as a value to the key.
 // Returns a list of foods from the FDCNAL API that closely match the foods from the given set, m
-func GetFoodData(set map[string]struct{}) []FdcnalFood {
+func SetFoodData(m map[string]FdcnalFood) []FdcnalFood {
 
 	// Get the nutritional data
 	flag.Parse()
-	query := appendString(set)
+	query := appendString(m)
 
 	// TODO best dataType?
 	// TODO pagesize?
@@ -63,8 +64,10 @@ func GetFoodData(set map[string]struct{}) []FdcnalFood {
 
 	// Find the foods that most matches the entries.
 	var foods []FdcnalFood
-	for k := range set {
-		foods = append(foods, findFood(k, fdcnal.Foods))
+	for k := range m {
+		matchingFood := findFood(k, fdcnal.Foods)
+		foods = append(foods, matchingFood)
+		m[k] = matchingFood
 	}
 	return foods
 }
@@ -89,7 +92,7 @@ func findFood(f string, foods []FdcnalFood) FdcnalFood {
 }
 
 // append the keys in the map to a string for use with a url
-func appendString(m map[string]struct{}) string {
+func appendString(m map[string]FdcnalFood) string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
