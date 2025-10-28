@@ -28,8 +28,9 @@ type FdcnalFood struct {
 }
 
 type FdcnalFoodNutrients struct {
-	NutrientId   int    `json:"nutrientId"`
-	NutrientName string `json:"nutrientName"`
+	NutrientId   int     `json:"nutrientId"`
+	NutrientName string  `json:"nutrientName"`
+	Value        float64 `json:"value"`
 }
 
 // m - map of the foods to search for and add FdcnalFood to
@@ -72,9 +73,26 @@ func SetFoodData(m map[string]FdcnalFood) []FdcnalFood {
 	return foods
 }
 
+// Get the total nutrient info by id of a given set of foods.
+//
+// foods - FDCNAL foods whose nutrients to total.
+// id    - FDCNAL ID of the nutrient.
+func GetTotalNutrientInfo(foods []FdcnalFood, id int) float64 {
+	total := 0.0
+	for _, f := range foods {
+		// hashmap?
+		for _, n := range f.FoodNutrients {
+			if n.NutrientId == id {
+				total += n.Value
+			}
+		}
+	}
+	return total
+}
+
 // Find the food that most matches
 //
-// f - Food to match
+// f     - Food to match
 // foods - The FDCNAL foods to compare with
 func findFood(f string, foods []FdcnalFood) FdcnalFood {
 	d := math.MaxInt

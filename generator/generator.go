@@ -4,6 +4,7 @@ package generator
 // or create a csv (or just send the straight up diary/nodes? All the interpreter does it ensure proper grammar?) and send that?
 
 import (
+	"fmt"
 	"food-interpreter/generator/fdcnal"
 	"food-interpreter/parser"
 	"log"
@@ -57,6 +58,15 @@ func addFoodData(m map[time.Time][]entry) {
 	}
 
 	fdcnal.SetFoodData(foods)
+
+	arr := []fdcnal.FdcnalFood{}
+	for _, v := range foods {
+		arr = append(arr, v)
+	}
+
+	total := fdcnal.GetTotalNutrientInfo(arr, 1089)
+	fmt.Println(total)
+
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
