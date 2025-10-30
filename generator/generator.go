@@ -48,18 +48,18 @@ type repeaterEntry struct {
 func addFoodData(m map[time.Time][]entry) {
 
 	// Map for the foods from the diary and it's most matching food from the FDCNAL DB.
-	foods := make(map[string]fdcnal.FdcnalFood)
+	foods := make(map[string]fdcnal.FdcnalFoodHashed)
 	for _, v := range m {
 		for _, e := range v {
 			if f, ok := e.(foodEntry); ok {
-				foods[f.name] = fdcnal.FdcnalFood{}
+				foods[f.name] = fdcnal.FdcnalFoodHashed{}
 			}
 		}
 	}
 
 	fdcnal.SetFoodData(foods)
 
-	arr := []fdcnal.FdcnalFood{}
+	arr := []fdcnal.FdcnalFoodHashed{}
 	for _, v := range foods {
 		arr = append(arr, v)
 	}

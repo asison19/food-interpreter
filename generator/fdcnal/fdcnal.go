@@ -33,10 +33,22 @@ type FdcnalFoodNutrients struct {
 	Value        float64 `json:"value"`
 }
 
+type FdcnalFoodHashed struct {
+	FdcId         int
+	Description   string
+	ServingSize   float64
+	FoodNutrients map[int]Nutrient
+}
+
+type Nutrient struct {
+	NutrientName string
+	Value        float64
+}
+
 // m - map of the foods to search for and add FdcnalFood to
 // Modifies m, adding matching FdcnalFood as a value to the key.
 // Returns a list of foods from the FDCNAL API that closely match the foods from the given set, m
-func SetFoodData(m map[string]FdcnalFood) []FdcnalFood {
+func SetFoodData(m map[string]FdcnalFoodHashed) []FdcnalFoodHashed {
 
 	// Get the nutritional data
 	flag.Parse()
@@ -64,30 +76,45 @@ func SetFoodData(m map[string]FdcnalFood) []FdcnalFood {
 	json.Unmarshal(body, &fdcnal)
 
 	// Find the foods that most matches the entries.
-	var foods []FdcnalFood
+	var foods []FdcnalFoodHashed
 	for k := range m {
 		matchingFood := findFood(k, fdcnal.Foods)
-		foods = append(foods, matchingFood)
-		m[k] = matchingFood
+		f := FdcnalFoodHashed{
+			matchingFood.FdcId,
+			matchingFood.Description,
+			matchingFood.ServingSize,
+			foodNutrientsToHashMap(matchingFood.FoodNutrients),
+		}
+
+		foods = append(foods, f)
+		m[k] = f
 	}
 	return foods
 }
 
 // Get the total nutrient info by id of a given set of foods.
+// TODO some nutrients, like calories (it's a nutrient in FDCNAL), have different versions, such as
+//
+//	1008, 2047, 2048,
+//
+// We should handle this one in its own func and prioritize one, 2048, 2047, 1008, in this case.
 //
 // foods - FDCNAL foods whose nutrients to total.
 // id    - FDCNAL ID of the nutrient.
-func GetTotalNutrientInfo(foods []FdcnalFood, id int) float64 {
+func GetTotalNutrientInfo(foods []FdcnalFoodHashed, id int) float64 {
 	total := 0.0
 	for _, f := range foods {
-		// hashmap?
-		for _, n := range f.FoodNutrients {
-			if n.NutrientId == id {
-				total += n.Value
-			}
-		}
+		total += f.FoodNutrients[id].Value
 	}
 	return total
+}
+
+func foodNutrientsToHashMap(fn []FdcnalFoodNutrients) map[int]Nutrient {
+	m := make(map[int]Nutrient)
+	for _, n := range fn {
+		m[n.NutrientId] = Nutrient{n.NutrientName, n.Value}
+	}
+	return m
 }
 
 // Find the food that most matches
@@ -110,7 +137,7 @@ func findFood(f string, foods []FdcnalFood) FdcnalFood {
 }
 
 // append the keys in the map to a string for use with a url
-func appendString(m map[string]FdcnalFood) string {
+func appendString(m map[string]FdcnalFoodHashed) string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
