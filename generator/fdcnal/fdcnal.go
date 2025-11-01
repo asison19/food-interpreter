@@ -3,16 +3,19 @@ package fdcnal
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"food-interpreter/generator/levenshtein"
 	"io"
 	"math"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 )
 
 var (
 	fdcnal_api_key = flag.String("fdcnal", os.Getenv("FDCNAL_API_KEY"), "The USDA Food Data Central API key.")
+	calorie_ids    = []int{2048, 2047, 1008}
 )
 
 // FDCNAL API JSON structs
@@ -93,20 +96,47 @@ func SetFoodData(m map[string]FdcnalFoodHashed) []FdcnalFoodHashed {
 }
 
 // Get the total nutrient info by id of a given set of foods.
-// TODO some nutrients, like calories (it's a nutrient in FDCNAL), have different versions, such as
+// Some nutrients, like calories (it's a nutrient in FDCNAL), have different versions, such as
 //
 //	1008, 2047, 2048,
-//
-// We should handle this one in its own func and prioritize one, 2048, 2047, 1008, in this case.
 //
 // foods - FDCNAL foods whose nutrients to total.
 // id    - FDCNAL ID of the nutrient.
 func GetTotalNutrientInfo(foods []FdcnalFoodHashed, id int) float64 {
+	if slices.Contains(calorie_ids, id) {
+		return GetTotalCalories(foods)
+	}
+
 	total := 0.0
 	for _, f := range foods {
 		total += f.FoodNutrients[id].Value
 	}
 	return total
+}
+
+// Get the total amount of calories in the given slice of foods.
+func GetTotalCalories(foods []FdcnalFoodHashed) float64 {
+	total := 0.0
+	for _, f := range foods {
+		v, ok := findIdValue(f, calorie_ids)
+		if ok {
+			total += v
+		} else {
+			fmt.Printf("Calories not found for food %v.\n", f)
+		}
+	}
+	return total
+}
+
+// Find the value of the passed in FdcnalFoodHashed given a set of IDs, returning the first found.
+func findIdValue(f FdcnalFoodHashed, ids []int) (float64, bool) {
+	for _, id := range ids {
+		n, ok := f.FoodNutrients[id]
+		if ok {
+			return n.Value, true
+		}
+	}
+	return 0, false
 }
 
 func foodNutrientsToHashMap(fn []FdcnalFoodNutrients) map[int]Nutrient {

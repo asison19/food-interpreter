@@ -64,7 +64,7 @@ func addFoodData(m map[time.Time][]entry) {
 		arr = append(arr, v)
 	}
 
-	total := fdcnal.GetTotalNutrientInfo(arr, 1089)
+	total := fdcnal.GetTotalNutrientInfo(arr, 2048)
 	fmt.Println(total)
 
 }
