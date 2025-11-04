@@ -30,8 +30,9 @@ type entry interface {
 
 // TODO the rest
 type foodEntry struct {
-	name     string
-	calories int // TODO The rest of the pertinent nutritional data and then comments in the future
+	name    string
+	details string
+	food    fdcnal.FdcnalFoodHashed
 }
 
 type sleepEntry struct {
@@ -45,7 +46,7 @@ type repeaterEntry struct {
 }
 
 // m - Map of date times and their entries of food, sleep, or repeater.
-func addFoodData(m map[time.Time][]entry) {
+func addFoodData(m map[time.Time][]entry) map[string]fdcnal.FdcnalFoodHashed {
 
 	// Map for the foods from the diary and it's most matching food from the FDCNAL DB.
 	foods := make(map[string]fdcnal.FdcnalFoodHashed)
@@ -59,6 +60,7 @@ func addFoodData(m map[time.Time][]entry) {
 
 	fdcnal.SetFoodData(foods)
 
+	// Get just the keys of foods without the string
 	arr := []fdcnal.FdcnalFoodHashed{}
 	for _, v := range foods {
 		arr = append(arr, v)
@@ -67,6 +69,17 @@ func addFoodData(m map[time.Time][]entry) {
 	total := fdcnal.GetTotalNutrientInfo(arr, 2048)
 	fmt.Println(total)
 
+	// Add to the map of times and entries from the Fdcnal nutrients retrieved/set to `foods`.
+	for _, v := range m {
+		for _, e := range v {
+			if fe, ok := e.(foodEntry); ok {
+				//fe.Nutrients = foods[fe.name].FoodNutrients
+				fe.food = foods[fe.name]
+			}
+		}
+	}
+
+	return foods
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
@@ -165,7 +178,11 @@ func handleSubNodes(list []entry, nodes []parser.Node) []entry {
 
 		// TODO at this point do the lexeme parsing for user inputted information?
 		if n, ok := node.(parser.Food); ok {
-			entry := foodEntry{n.GetToken().Lexeme, 0}
+			entry := foodEntry{
+				n.GetToken().Lexeme,
+				"",
+				fdcnal.FdcnalFoodHashed{FdcId: -1, Description: "", ServingSize: -1, FoodNutrients: nil},
+			}
 			list = append(list, entry)
 		} else if n, ok := node.(parser.Sleep); ok {
 			entry := sleepEntry{n.GetToken().Lexeme}
