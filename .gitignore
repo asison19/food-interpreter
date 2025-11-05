@@ -4,3 +4,5 @@ plantuml*.jar
 notes/
 *temp*
 .venv
+*secret*
+./data/

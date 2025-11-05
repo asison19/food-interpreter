@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"food-interpreter/generator/levenshtein"
+	"food-interpreter/levenshtein"
 	"io"
 	"math"
 	"net/http"

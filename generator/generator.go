@@ -4,8 +4,6 @@ package generator
 // or create a csv (or just send the straight up diary/nodes? All the interpreter does it ensure proper grammar?) and send that?
 
 import (
-	"fmt"
-	"food-interpreter/generator/fdcnal"
 	"food-interpreter/parser"
 	"log"
 	"strconv"
@@ -25,56 +23,31 @@ type currentDate struct {
 	day   int
 }
 
-type entry interface {
+type Entry interface {
 }
 
 // TODO the rest
-type foodEntry struct {
-	name     string
-	calories int // TODO The rest of the pertinent nutritional data and then comments in the future
+type FoodEntry struct {
+	Name    string
+	Details string
 }
 
-type sleepEntry struct {
+type SleepEntry struct {
 	// TODO sleep hygiene?
-	details string
+	Details string
 }
 
-type repeaterEntry struct {
+type RepeaterEntry struct {
 	// TODO this entry will potentially have a mix of stuff. Should deal with it before getting to here?
-	details string
-}
-
-// m - Map of date times and their entries of food, sleep, or repeater.
-func addFoodData(m map[time.Time][]entry) {
-
-	// Map for the foods from the diary and it's most matching food from the FDCNAL DB.
-	foods := make(map[string]fdcnal.FdcnalFoodHashed)
-	for _, v := range m {
-		for _, e := range v {
-			if f, ok := e.(foodEntry); ok {
-				foods[f.name] = fdcnal.FdcnalFoodHashed{}
-			}
-		}
-	}
-
-	fdcnal.SetFoodData(foods)
-
-	arr := []fdcnal.FdcnalFoodHashed{}
-	for _, v := range foods {
-		arr = append(arr, v)
-	}
-
-	total := fdcnal.GetTotalNutrientInfo(arr, 2048)
-	fmt.Println(total)
-
+	Details string
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)
-func Generate(nodes []parser.Node) map[time.Time][]entry {
+func Generate(nodes []parser.Node) map[time.Time][]Entry {
 	currentDate := currentDate{0, 0, 0}
 
 	// A map of date times and their entries of food, sleep, or repeater.
-	m := make(map[time.Time][]entry)
+	m := make(map[time.Time][]Entry)
 	for _, node := range nodes {
 
 		// Get the year
@@ -100,7 +73,6 @@ func Generate(nodes []parser.Node) map[time.Time][]entry {
 			}
 		}
 	}
-	addFoodData(m)
 	return m
 }
 
@@ -143,7 +115,7 @@ func handleMonthAndDay(node parser.MonthAndDay) (time.Month, int) {
 
 // Each time should have some food, repeater, or sleep tied to it, or even multiple
 // Returns the time and list of entries done at that time
-func handleTime(node parser.Time) (int, []entry) {
+func handleTime(node parser.Time) (int, []Entry) {
 
 	// Get the time
 	timeStr := node.GetToken().Lexeme
@@ -152,12 +124,12 @@ func handleTime(node parser.Time) (int, []entry) {
 		log.Fatal("Invalid time: " + timeStr)
 	}
 
-	list := handleSubNodes([]entry{}, node.GetSubNodes())
+	list := handleSubNodes([]Entry{}, node.GetSubNodes())
 
 	return time, list
 }
 
-func handleSubNodes(list []entry, nodes []parser.Node) []entry {
+func handleSubNodes(list []Entry, nodes []parser.Node) []Entry {
 	for _, node := range nodes {
 		if node == nil {
 			return list
@@ -165,13 +137,13 @@ func handleSubNodes(list []entry, nodes []parser.Node) []entry {
 
 		// TODO at this point do the lexeme parsing for user inputted information?
 		if n, ok := node.(parser.Food); ok {
-			entry := foodEntry{n.GetToken().Lexeme, 0}
+			entry := FoodEntry{n.GetToken().Lexeme, ""}
 			list = append(list, entry)
 		} else if n, ok := node.(parser.Sleep); ok {
-			entry := sleepEntry{n.GetToken().Lexeme}
+			entry := SleepEntry{n.GetToken().Lexeme}
 			list = append(list, entry)
 		} else if n, ok := node.(parser.Repeater); ok {
-			entry := repeaterEntry{n.GetToken().Lexeme}
+			entry := RepeaterEntry{n.GetToken().Lexeme}
 			list = append(list, entry)
 		}
 

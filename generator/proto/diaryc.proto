@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "food-interpreter/interpreter/interpreterpb";
+
+package interpreter;
+
+service InterpreterServer {
+    rpc Interpret (DiaryRequest) returns (DiaryReply) {}
+}
+
+message DiaryRequest {
+    string diary = 1;
+}
+
+message DiaryReply {
+    string tokens = 1;
+}
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+}
+
+message PersonList {
+  repeated Person people = 1;
+}
