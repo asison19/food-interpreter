@@ -24,6 +24,8 @@ type currentDate struct {
 }
 
 type Entry interface {
+	GetName() string
+	GetDetails() string
 }
 
 // TODO the rest
@@ -32,14 +34,38 @@ type FoodEntry struct {
 	Details string
 }
 
+func (e FoodEntry) GetDetails() string {
+	return e.Details
+}
+
+func (e FoodEntry) GetName() string {
+	return e.Name
+}
+
 type SleepEntry struct {
 	// TODO sleep hygiene?
 	Details string
 }
 
+func (e SleepEntry) GetDetails() string {
+	return e.Details
+}
+
+func (e SleepEntry) GetName() string {
+	return "Sleep"
+}
+
 type RepeaterEntry struct {
 	// TODO this entry will potentially have a mix of stuff. Should deal with it before getting to here?
 	Details string
+}
+
+func (e RepeaterEntry) GetDetails() string {
+	return e.Details
+}
+
+func (e RepeaterEntry) GetName() string {
+	return "Repeater" // TODO the details of the repeater should probably be it's templated out
 }
 
 // Nodes - slice of root nodes (YEAR or MONTHANDDAY)

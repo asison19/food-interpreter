@@ -13,9 +13,9 @@ func Interpret(diary string) parser.Parser {
 	l := lexer.LexString(diary)
 	p, nodes := parser.ParseTokens(l.Tokens)
 
-	foods := generator.Generate(nodes)
+	entries := generator.Generate(nodes)
 
-	nutritionist.AddFoodData(foods)
+	nutritionist.AddFoodData(entries)
 
 	return p // TODO return diary entries
 }
