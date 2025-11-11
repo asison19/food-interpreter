@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"fmt"
 	"food-interpreter/generator"
 	"food-interpreter/lexer"
 	"food-interpreter/nutritionist"
@@ -15,7 +16,9 @@ func Interpret(diary string) parser.Parser {
 
 	entries := generator.Generate(nodes)
 
-	nutritionist.AddFoodData(entries)
+	foodEntries := nutritionist.AddFoodData(entries)
+
+	fmt.Println(nutritionist.GetNutrition(foodEntries, 2048))
 
 	return p // TODO return diary entries
 }
