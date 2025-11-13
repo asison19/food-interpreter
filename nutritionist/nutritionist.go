@@ -3,11 +3,14 @@ package nutritionist
 import (
 	"food-interpreter/generator"
 	"food-interpreter/nutritionist/fdcnal"
+	"log"
+	"slices"
 	"time"
 )
 
 var (
-	timezone time.Location = *time.Local // TODO make this configurable
+	timezone    time.Location = *time.Local // TODO make this configurable
+	calorie_ids               = []int{2048, 2047, 1008}
 )
 
 type FoodEntry struct {
@@ -46,6 +49,10 @@ func AddFoodData(m map[time.Time][]generator.Entry) map[time.Time]FoodEntry {
 // foods - Set of foods from the FDCNAL API whose nutrients have been hashed.
 // id    - ID of the type of nutrient to gather
 func GetNutrition(m map[time.Time]FoodEntry, id int) float64 {
+	if slices.Contains(calorie_ids, id) {
+		return GetCalories(m)
+	}
+
 	nutritionAmt := 0.0
 	for _, entry := range m {
 		nutritionAmt += entry.Food.FoodNutrients[id].Value
@@ -67,7 +74,31 @@ func GetDateNutrition(start, end time.Time, m map[time.Time]FoodEntry, id int) f
 	return nutritionAmt
 }
 
+func GetCalories(m map[time.Time]FoodEntry) float64 {
+	amt := 0.0
+	for _, f := range m {
+		v, ok := findIdValue(f, calorie_ids)
+		if ok {
+			amt += v
+		} else {
+			log.Printf("Calories not found for food %v.\n", f)
+		}
+	}
+	return amt
+}
+
 // Check that the given time is between the given start and end
 func inTimeSpan(start, end, time time.Time) bool {
 	return time.After(start) && time.Before(end)
+}
+
+// Find the value of the passed in FdcnalFoodHashed given a set of IDs, returning the first found.
+func findIdValue(f FoodEntry, ids []int) (float64, bool) {
+	for _, id := range ids {
+		n, ok := f.Food.FoodNutrients[id]
+		if ok {
+			return n.Value, true
+		}
+	}
+	return 0, false
 }

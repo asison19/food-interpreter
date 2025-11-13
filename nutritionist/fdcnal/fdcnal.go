@@ -115,7 +115,7 @@ func GetTotalNutrientInfo(foods []FdcnalFoodHashed, id int) float64 {
 }
 
 // Get the total amount of calories in the given slice of foods.
-func GetTotalCalories(foods []FdcnalFoodHashed) float64 { // TODO this is bugged when calling from interpreter with any calorie ID
+func GetTotalCalories(foods []FdcnalFoodHashed) float64 {
 	total := 0.0
 	for _, f := range foods {
 		v, ok := findIdValue(f, calorie_ids)
