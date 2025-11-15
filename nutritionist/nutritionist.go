@@ -9,8 +9,13 @@ import (
 )
 
 var (
-	timezone    time.Location = *time.Local // TODO make this configurable
-	calorie_ids               = []int{2048, 2047, 1008}
+	timezone time.Location = *time.Local // TODO make this configurable
+
+	// Calories are the following IDs
+	// - 2048 - Energy (Atwater Specific Factors)
+	// - 2047 - Energy (Atwater General Factors)
+	// - 1008 - Energy
+	calorie_ids = []int{2048, 2047, 1008}
 )
 
 type FoodEntry struct {
@@ -65,13 +70,13 @@ func GetNutrition(m map[time.Time]FoodEntry, id int) float64 {
 // foods - Set of foods from the FDCNAL API whose nutrients have been hashed.
 // id    - ID of the type of nutrient to gather
 func GetDateNutrition(start, end time.Time, m map[time.Time]FoodEntry, id int) float64 {
-	nutritionAmt := 0.0
+	amt := 0.0
 	for time, entry := range m {
 		if inTimeSpan(start, end, time) {
-			nutritionAmt += entry.Food.FoodNutrients[id].Value
+			amt += entry.Food.FoodNutrients[id].Value
 		}
 	}
-	return nutritionAmt
+	return amt
 }
 
 func GetCalories(m map[time.Time]FoodEntry) float64 {
@@ -82,6 +87,21 @@ func GetCalories(m map[time.Time]FoodEntry) float64 {
 			amt += v
 		} else {
 			log.Printf("Calories not found for food %v.\n", f)
+		}
+	}
+	return amt
+}
+
+func GetDateCalories(start, end time.Time, m map[time.Time]FoodEntry, id int) float64 {
+	amt := 0.0
+	for t, f := range m {
+		if inTimeSpan(start, end, t) { // TODO refactor this date stuff
+			v, ok := findIdValue(f, calorie_ids)
+			if ok {
+				amt += v
+			} else {
+				log.Printf("Calories not found for food %v.\n", f)
+			}
 		}
 	}
 	return amt
